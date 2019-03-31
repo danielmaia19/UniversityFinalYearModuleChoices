@@ -8,7 +8,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import model.Module;
 
-public class TermSelectionViewPane extends HBox {
+public class TermSelectionViewPane extends VBox {
 
     private Label selectedTermModulesLabel;
     private Label unselectedTermModulesLabel;
@@ -17,6 +17,8 @@ public class TermSelectionViewPane extends HBox {
     private TermSelectionButtonPane termSelectionButtonPane;
 
     public TermSelectionViewPane() {
+
+        HBox selectionContainer = new HBox();
 
         VBox unselectedModules = new VBox();
         unselectedTermModulesLabel = new Label();
@@ -35,15 +37,19 @@ public class TermSelectionViewPane extends HBox {
         selectedModules.setPadding(new Insets(20,0,20,0));
         selectedModules.getChildren().addAll(selectedTermModulesLabel, selectedTermModulesList);
 
+        selectionContainer.getChildren().addAll(unselectedModules, selectedModules);
+
+        HBox buttonPaneContainer = new HBox();
         termSelectionButtonPane = new TermSelectionButtonPane();
         termSelectionButtonPane.setCreditsTxtField("23");
+        buttonPaneContainer.getChildren().add(termSelectionButtonPane);
 
         this.setPrefHeight(50);
         HBox.setHgrow(selectedModules, Priority.ALWAYS);
         HBox.setHgrow(unselectedModules, Priority.ALWAYS);
         HBox.setHgrow(this,Priority.ALWAYS);
         VBox.setVgrow(this,Priority.ALWAYS);
-        this.getChildren().addAll(unselectedModules, selectedModules);
+        this.getChildren().addAll(selectionContainer, buttonPaneContainer);
     }
 
     public Label getUnselectedTermModulesLabel() {
@@ -60,5 +66,9 @@ public class TermSelectionViewPane extends HBox {
 
     public void addToSelectedList(Module m) {
         selectedTermModulesList.getItems().add(m);
+    }
+
+    public TermSelectionButtonPane getTermSelectionButtonPane() {
+        return termSelectionButtonPane;
     }
 }

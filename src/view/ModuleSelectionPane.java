@@ -31,13 +31,11 @@ public class ModuleSelectionPane extends VBox {
         term1SectionViewPane = new TermSelectionViewPane();
         term1SectionViewPane.getUnselectedTermModulesLabel().setText("Unselected Term 1 Modules");
         term1SectionViewPane.getSelectedTermModulesLabel().setText("Selected Term 1 Modules");
-        //term1SelectionButtonPane = new TermSelectionButtonPane();
 
         // Term 2 Selection View Pane
         term2SelectionViewPane = new TermSelectionViewPane();
         term2SelectionViewPane.getUnselectedTermModulesLabel().setText("Unselected Term 2 Modules");
         term2SelectionViewPane.getSelectedTermModulesLabel().setText("Selected Term 2 Modules");
-        //term2SelectionButtonPane = new TermSelectionButtonPane();
 
         HBox actionBox = new HBox();
         submitBtn = new Button("Submit");
@@ -49,8 +47,7 @@ public class ModuleSelectionPane extends VBox {
         actionBox.getChildren().addAll(submitBtn, resetBtn);
 
         this.setPadding(new Insets(20,20,20,20));
-        this.getChildren().addAll(selectedYearLongModule, term1SectionViewPane, term1SelectionButtonPane,
-                term2SelectionViewPane, term2SelectionButtonPane, actionBox);
+        this.getChildren().addAll(selectedYearLongModule, term1SectionViewPane, term2SelectionViewPane, actionBox);
     }
 
     public TermSelectionViewPane getTerm1SectionViewPane() {
@@ -68,7 +65,7 @@ public class ModuleSelectionPane extends VBox {
     public void submitModulesHandler(EventHandler<ActionEvent> handler) {
         submitBtn.setOnAction(handler);
     }
-    public void resettModulesHandler(EventHandler<ActionEvent> handler) {
+    public void resetModulesHandler(EventHandler<ActionEvent> handler) {
         resetBtn.setOnAction(handler);
     }
 }
