@@ -1,7 +1,5 @@
 package view;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.*;
@@ -12,7 +10,7 @@ public class OptionsModuleChooserRootPane extends BorderPane {
 
     private TabPane tabPane;
     private ProfileMenuBar menuBar;
-    private SetupProfilePane setupProfilePane;
+    private StudentProfileViewPane studentProfileViewPane;
     private ModuleSelectionPane moduleSelectionPane;
     private OverviewSelectionPane overviewSelectionPane;
     private Tab createProfileTab, createCourseSelectionTab, createOverviewTab;
@@ -22,11 +20,11 @@ public class OptionsModuleChooserRootPane extends BorderPane {
         tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
         menuBar = new ProfileMenuBar();
-        setupProfilePane = new SetupProfilePane();
+        studentProfileViewPane = new StudentProfileViewPane();
         overviewSelectionPane = new OverviewSelectionPane();
         moduleSelectionPane = new ModuleSelectionPane();
 
-        createProfileTab = new Tab("Create Profile", setupProfilePane);
+        createProfileTab = new Tab("Create Profile", studentProfileViewPane);
 
         createCourseSelectionTab = new Tab("Select Modules", moduleSelectionPane);
         createCourseSelectionTab.setDisable(true);
@@ -66,8 +64,8 @@ public class OptionsModuleChooserRootPane extends BorderPane {
     public ProfileMenuBar getMenuBar() {
         return menuBar;
     }
-    public SetupProfilePane getSetupProfilePane() {
-        return setupProfilePane;
+    public StudentProfileViewPane getStudentProfileViewPane() {
+        return studentProfileViewPane;
     }
     public ModuleSelectionPane getModuleSelectionPane() {
         return moduleSelectionPane;

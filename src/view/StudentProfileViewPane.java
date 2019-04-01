@@ -17,16 +17,16 @@ import sun.plugin2.jvm.RemoteJVMLauncher;
 import java.time.LocalDate;
 import java.time.MonthDay;
 
-public class SetupProfilePane extends GridPane {
+public class StudentProfileViewPane extends GridPane {
 
     private Button btnProfile;
+    private Label emailValidation;
     private ComboBox<Course> cboCourses;
     private TextField txtSurname, txtFirstName, txtPNumber, txtEmail;
-    private Label emailValidation;
 
     private DatePicker date;
 
-    public SetupProfilePane() {
+    public StudentProfileViewPane() {
         //styling
         this.setPadding(new Insets(80, 80, 80, 80));
         this.setVgap(15);
@@ -99,23 +99,21 @@ public class SetupProfilePane extends GridPane {
     public TextField getTxtEmail() {
         return txtEmail;
     }
+    public Course getSelectedCourse() {
+        return cboCourses.getSelectionModel().getSelectedItem();
+    }
     public DatePicker getDate() {
         return date;
     }
 
-    public void setErrorMessage(String message) {
+    // Set methods
+    public void setEmailInvalidMessage(String message) {
         emailValidation.setText(message);
     }
 
-    //method to allow the controller to populate the combobox
     public void populateComboBoxWithCourses(Course[] courses) {
         cboCourses.getItems().addAll(courses);
         cboCourses.getSelectionModel().select(0); //select first opponent by default
-    }
-
-    //methods to retrieve the form selection/input
-    public Course getSelectedCourse() {
-        return cboCourses.getSelectionModel().getSelectedItem();
     }
 
     public void addCreateStudentProfileHandler(EventHandler<ActionEvent> handler) {
@@ -135,7 +133,6 @@ public class SetupProfilePane extends GridPane {
     }
 
     private class DisablePastDates implements Callback<DatePicker, DateCell> {
-
         @Override
         public DateCell call(DatePicker param) {
             return new DateCell() {

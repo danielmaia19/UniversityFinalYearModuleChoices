@@ -17,7 +17,6 @@ public class ModuleSelectionPane extends VBox {
     private ListView yearLongModulesList;
     private TermSelectionViewPane term1SectionViewPane;
     private TermSelectionViewPane term2SelectionViewPane;
-    private TermSelectionButtonPane term1SelectionButtonPane, term2SelectionButtonPane;
 
     public ModuleSelectionPane() {
 

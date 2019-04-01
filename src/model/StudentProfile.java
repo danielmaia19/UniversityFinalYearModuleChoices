@@ -70,7 +70,7 @@ public class StudentProfile {
 	public boolean addToSelectedModules(Module m) {
 		return selectedModules.add(m);
 	}
-	
+
 	public Set<Module> getAllSelectedModules() {
 		return selectedModules;
 	}
