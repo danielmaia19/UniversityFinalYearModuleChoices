@@ -1,40 +1,45 @@
 package controller;
 
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.*;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.FileChooser;
 import model.*;
 import view.*;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.io.*;
+import java.nio.file.Paths;
+import java.util.*;
+
+import static java.util.stream.Collectors.toList;
 
 public class OptionsModuleChooserController {
 
-    //fields to be used throughout the class
     private StudentProfile model;
-    private ProfileMenuBar profileMenuBar;
     private OptionsModuleChooserRootPane view;
-    private StudentProfileViewPane studentProfileViewPane;
-    private ModuleSelectionPane moduleSelectionPane;
+    private OverviewViewPane overviewViewPane;
     private TermSelectionViewPane term1SelectionPane;
     private TermSelectionViewPane term2SelectionPane;
-    private OverviewSelectionPane overviewSelectionPane;
-
+    private StudentProfileViewPane studentProfileViewPane;
+    private ModuleSelectionViewPane moduleSelectionViewPane;
+    private OptionsModuleChooserMenuBar optionsModuleChooserMenuBar;
 
     public OptionsModuleChooserController(OptionsModuleChooserRootPane view, StudentProfile model) {
         //initialise model and view fields
         this.model = model;
         this.view = view;
 
-        profileMenuBar = view.getMenuBar();
+        optionsModuleChooserMenuBar = view.getMenuBar();
         studentProfileViewPane = view.getStudentProfileViewPane();
-        moduleSelectionPane = view.getModuleSelectionPane();
-        overviewSelectionPane = view.getOverviewSelectionPane();
-        term1SelectionPane = view.getModuleSelectionPane().getTerm1SectionViewPane();
-
-        term2SelectionPane = view.getModuleSelectionPane().getTerm2SelectionViewPane();
+        moduleSelectionViewPane = view.getModuleSelectionViewPane();
+        overviewViewPane = view.getOverviewViewPane();
+        term1SelectionPane = view.getModuleSelectionViewPane().getTerm1SectionViewPane();
+        term2SelectionPane = view.getModuleSelectionViewPane().getTerm2SelectionViewPane();
 
         //populate combobox in create profile pane, e.g. if profilePane represented your create profile pane you could invoke the line below
         studentProfileViewPane.populateComboBoxWithCourses(setupAndRetrieveCourses());
@@ -45,6 +50,9 @@ public class OptionsModuleChooserController {
         // Attach Bindings
         this.attachBindings();
 
+        // Attach Change Listeners
+        this.attachChangeListeners();
+
     }
 
     private void attachBindings() {
@@ -52,17 +60,68 @@ public class OptionsModuleChooserController {
     }
 
     private void attachEventHandlers() {
-        profileMenuBar.addAboutHandler(a -> alertDialogBuilder(AlertType.INFORMATION, "Information Dialog", null, "Options Module Chooser MVC app v1.0"));
+        optionsModuleChooserMenuBar.addAboutHandler(a -> alertDialogBuilder(AlertType.INFORMATION, "Information Dialog", null, "Options Module Chooser MVC app v1.0"));
+        optionsModuleChooserMenuBar.addExitHandler(e -> System.exit(0));
+
         studentProfileViewPane.addCreateStudentProfileHandler(new StudentProfilesHandler());
-        moduleSelectionPane.submitModulesHandler(new SubmitModulesHandler());
-        profileMenuBar.addLoadStudentDataHandler(new LoadStudentHandler());
-        moduleSelectionPane.resetModulesHandler(new ResetModulesHandler());
-        profileMenuBar.addSaveStudentDataHandler(new SaveStudentHandler());
-        profileMenuBar.addExitHandler(e -> System.exit(0));
-        term1SelectionPane.getTermSelectionButtonPane().addAddHandler(new AddTerm1Handler());
-        term1SelectionPane.getTermSelectionButtonPane().addRemoveHandler(new RemoveTerm1SelectedModuleHandler());
-        term2SelectionPane.getTermSelectionButtonPane().addAddHandler(new AddTerm2Handler());
-        term2SelectionPane.getTermSelectionButtonPane().addRemoveHandler(new RemoveTerm2SelectedModuleHandler());
+        moduleSelectionViewPane.addSubmitModulesHandler(new SubmitModulesHandler());
+        moduleSelectionViewPane.addResetModulesHandler(new ResetModulesHandler());
+
+        optionsModuleChooserMenuBar.addLoadStudentDataHandler(new LoadStudentHandler());
+        optionsModuleChooserMenuBar.addSaveStudentDataHandler(new SaveStudentHandler());
+
+        // Term 1 - Add & Remove Handlers
+        term1SelectionPane.addAddHandler(new AddHandler(term1SelectionPane));
+        term1SelectionPane.addRemoveHandler(new RemoveHandler(term1SelectionPane));
+
+        // Term 2 - Add & Remove Handlers
+        term2SelectionPane.addAddHandler(new AddHandler(term2SelectionPane));
+        term2SelectionPane.addRemoveHandler(new RemoveHandler(term2SelectionPane));
+
+        // Select items with double clicks
+        term1SelectionPane.addDoubleMouseClickSelectionHandler(new DoubleMouseClickSelectionHandler(term1SelectionPane));
+        term2SelectionPane.addDoubleMouseClickSelectionHandler(new DoubleMouseClickSelectionHandler(term2SelectionPane));
+
+        overviewViewPane.addSaveOverviewHandler(new SaveOverviewHandler());
+
+        optionsModuleChooserMenuBar.addLoadCourseDataHandler(new LoadCoursesHandler());
+    }
+
+    private void attachChangeListeners() {
+        studentProfileViewPane.addPNumberChangeListener(new TextFieldLimitListener(8));
+        studentProfileViewPane.addFirstNameChangeListener(new TextFieldLimitListener(30));
+        studentProfileViewPane.addSurnameChangeListener(new TextFieldLimitListener(30));
+    }
+
+    // Populates the list views accordingly
+    // Also used to reset when ResentHandler is used
+    public void populateTermModulesViews() {
+        List<Module> collect = new ArrayList<>(studentProfileViewPane.getSelectedCourse().getAllModulesOnCourse());
+
+        for (Module m : collect) {
+            if (m.getRunPlan() == Delivery.YEAR_LONG) {
+                moduleSelectionViewPane.addYearLongModule(m);
+                model.addToSelectedModules(m);
+                term1SelectionPane.increaseCreditsBy(m.getCredits() / 2);
+                term2SelectionPane.increaseCreditsBy(m.getCredits() / 2);
+            }
+
+            if (m.getRunPlan() == Delivery.TERM_1 && m.isMandatory()) {
+                model.addToSelectedModules(m);
+                term1SelectionPane.addToSelectedList(m);
+                term1SelectionPane.increaseCreditsBy(m.getCredits());
+            }
+
+            if (m.getRunPlan() == Delivery.TERM_2 && m.isMandatory()) {
+                model.addToSelectedModules(m);
+                term2SelectionPane.addToSelectedList(m);
+                term2SelectionPane.increaseCreditsBy(m.getCredits());
+            }
+
+            term1SelectionPane.addToUnselectedList(m, Delivery.TERM_1);
+            term2SelectionPane.addToUnselectedList(m, Delivery.TERM_2);
+
+        }
     }
 
     private Course[] setupAndRetrieveCourses() {
@@ -129,48 +188,82 @@ public class OptionsModuleChooserController {
         return courses;
     }
 
+    /**
+     * Add the selected module to the list and increase the credits accordingly
+     *
+     * @param termSelectionViewPane - used to behave according to the view
+     */
+    public void addModuleToListAndUpdateCredits(TermSelectionViewPane termSelectionViewPane) {
+        if (termSelectionViewPane.getCredits() < termSelectionViewPane.getCreditLimit()) {
+            model.addToSelectedModules(termSelectionViewPane.getUnSelectedModule());
+            termSelectionViewPane.addToSelectedList(termSelectionViewPane.getUnSelectedModule());
+            termSelectionViewPane.removeModuleFromList(termSelectionViewPane.getUnSelectedModule());
+            termSelectionViewPane.increaseCreditsBy(termSelectionViewPane.getUnSelectedModule().getCredits());
+        } else {
+            alertDialogBuilder(AlertType.ERROR, "Max Modules", null, "Selected the maximum amount of modules");
+        }
+    }
+
     // EventHandlers used
-    public class StudentProfilesHandler implements EventHandler {
+    public class AddHandler implements EventHandler {
+        TermSelectionViewPane termSelectionViewPane;
+
+        public AddHandler(TermSelectionViewPane termSelectionViewPane) {
+            this.termSelectionViewPane = termSelectionViewPane;
+        }
 
         @Override
         public void handle(Event event) {
-            if (studentProfileViewPane.getTxtEmail().getText().matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
-                    + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")) {
-
-                term1SelectionPane.clearAllListViews();
-                term2SelectionPane.clearAllListViews();
-
-                List<Module> collect = studentProfileViewPane.getSelectedCourse().getAllModulesOnCourse().stream().collect(Collectors.toList());
-                for (Module m : collect) {
-                    if (m.getRunPlan() == Delivery.TERM_1 && !m.isMandatory()) {
-                        term1SelectionPane.addToUnselectedList(m);
-                    }
-                    if (m.getRunPlan() == Delivery.TERM_2 && !m.isMandatory()) {
-                        term2SelectionPane.addToUnselectedList(m);
-                    }
-                    if (m.getRunPlan() == Delivery.YEAR_LONG) {
-                        moduleSelectionPane.addYearLong(m);
-                    }
-                    if (m.getRunPlan() == Delivery.TERM_1 && m.isMandatory()) {
-                        term1SelectionPane.addToSelectedList(m);
-                    }
-                    if (m.getRunPlan() == Delivery.TERM_2 && m.isMandatory()) {
-                        term2SelectionPane.addToSelectedList(m);
-                    }
-                }
-
-                model.setCourseOfStudy(studentProfileViewPane.getSelectedCourse());
-                model.setEmail(studentProfileViewPane.getTxtEmail().getText());
-                model.setPnumber(studentProfileViewPane.getTxtPNumber().getText());
-                model.setStudentName(new Name(studentProfileViewPane.getTxtFirstName().getText(), studentProfileViewPane.getTxtSurname().getText()));
-
-                //TODO:: Can we change this method to return a string rather then a LocalDate, so we can change the format?
-                model.setSubmissionDate(studentProfileViewPane.getDate().getValue());
-
-                view.changeTab(1);
-                view.enableTab(view.getCreateCourseSelectionTab());
+            if (!model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
+                addModuleToListAndUpdateCredits(termSelectionViewPane);
             } else {
-                studentProfileViewPane.setEmailInvalidMessage("Please enter a valid email address");
+                alertDialogBuilder(AlertType.ERROR, "Duplicate Module", null, "Module has already been added");
+            }
+        }
+    }
+
+    public class RemoveHandler implements EventHandler {
+
+        TermSelectionViewPane termSelectionViewPane;
+
+        public RemoveHandler(TermSelectionViewPane termSelectionViewPane) {
+            this.termSelectionViewPane = termSelectionViewPane;
+        }
+
+        @Override
+        public void handle(Event event) {
+            if (termSelectionViewPane.getSelectedItem() == null) {
+                alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Please select an item to remove.");
+            } else if (termSelectionViewPane.getSelectedItem().isMandatory()) {
+                alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Cannot remove mandatory items");
+            } else {
+                //termSelectionViewPane.decreaseCreditsBy(termSelectionViewPane.getCredits());
+                //int currentVal = termSelectionViewPane.getCredits();
+                //int newVal = currentVal - termSelectionViewPane.getSelectedItem().getCredits();
+                //termSelectionViewPane.setCredits(newVal);
+                termSelectionViewPane.decreaseCreditsBy(termSelectionViewPane.getCredits());
+                model.getAllSelectedModules().remove(termSelectionViewPane.getSelectedItem());
+                termSelectionViewPane.removeSelectedItem();
+            }
+        }
+    }
+
+    public class SaveStudentHandler implements EventHandler {
+        @Override
+        public void handle(Event event) {
+
+            File selectedFile = saveDialogBuilder("Save Profile", "DAT files (*.dat)", "dat");
+
+            ObjectOutputStream oos;
+            try {
+                oos = new ObjectOutputStream(new FileOutputStream(selectedFile));
+                oos.writeObject(model);
+                oos.flush();
+                oos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (NullPointerException e) {
+                System.out.println("Dialog was cancelled");
             }
         }
     }
@@ -178,14 +271,118 @@ public class OptionsModuleChooserController {
     public class LoadStudentHandler implements EventHandler {
         @Override
         public void handle(Event event) {
-            System.out.println("Loading button clicked");
+            model.clearAllSelectedModules();
+            view.getModuleSelectionViewPane().resetAll();
+
+            File selectedFile = openDialogBuilder("Load Profile", "DAT files (*.dat)", "dat");
+
+            try {
+                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(selectedFile));
+                StudentProfile s = (StudentProfile) ois.readObject();
+
+                model.setStudentName(s.getStudentName());
+                studentProfileViewPane.setTxtFirstName(s.getStudentName().getFirstName());
+                studentProfileViewPane.setTxtSurname(s.getStudentName().getFamilyName());
+
+                model.setPnumber(s.getPnumber());
+                studentProfileViewPane.setTxtPNumber(s.getPnumber());
+
+                model.setEmail(s.getEmail());
+                studentProfileViewPane.setTxtEmail(s.getEmail());
+
+                model.setSubmissionDate(s.getSubmissionDate());
+                studentProfileViewPane.setDate(s.getSubmissionDate());
+
+                model.setCourseOfStudy(s.getCourseOfStudy());
+                studentProfileViewPane.setSelectedCourse(s.getCourseOfStudy());
+
+                List<Module> courseModules = new ArrayList<>(studentProfileViewPane.getSelectedCourse().getAllModulesOnCourse());
+                List<Module> savedStudentProfile = new ArrayList<>(s.getAllSelectedModules());
+
+                for (Module m : savedStudentProfile) {
+                    if (m.getRunPlan() == Delivery.YEAR_LONG) {
+                        moduleSelectionViewPane.addYearLongModule(m);
+                        model.addToSelectedModules(m);
+                        term1SelectionPane.increaseCreditsBy(m.getCredits() / 2);
+                        term2SelectionPane.increaseCreditsBy(m.getCredits() / 2);
+                    }
+
+                    if (m.getRunPlan() == Delivery.TERM_1) {
+                        term1SelectionPane.addToSelectedList(m);
+                        model.addToSelectedModules(m);
+                        term1SelectionPane.increaseCreditsBy(m.getCredits());
+                    }
+
+                    if (m.getRunPlan() == Delivery.TERM_2) {
+                        term2SelectionPane.addToSelectedList(m);
+                        model.addToSelectedModules(m);
+                        term2SelectionPane.increaseCreditsBy(m.getCredits());
+                    }
+                }
+
+                for (Module m : courseModules) {
+                    if (!savedStudentProfile.contains(m)) {
+                        term1SelectionPane.addToUnselectedList(m, Delivery.TERM_1);
+                        term2SelectionPane.addToUnselectedList(m, Delivery.TERM_2);
+                    }
+                }
+
+                ois.close();
+                view.changeTab(1);
+                view.enableTab(view.getCreateCourseSelectionTab());
+                optionsModuleChooserMenuBar.enableMenuItem(optionsModuleChooserMenuBar.getSaveItem());
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (NullPointerException e) {
+                System.out.println("Dialog was cancelled");
+            }
         }
     }
 
-    public class SaveStudentHandler implements EventHandler {
+    public class ResetModulesHandler implements EventHandler {
         @Override
         public void handle(Event event) {
-            System.out.println("Save Student Eventhandler clicked");
+            model.getAllSelectedModules().clear();
+            view.getModuleSelectionViewPane().resetAll();
+            populateTermModulesViews();
+        }
+    }
+
+    public class SaveOverviewHandler implements EventHandler {
+
+        @Override
+        public void handle(Event event) {
+            File selectedFile = saveDialogBuilder("Save Overview", "TXT files (*.txt)", "txt");
+
+            FileWriter fileWriter;
+            try {
+                fileWriter = new FileWriter(selectedFile);
+                PrintWriter printWriter = new PrintWriter(fileWriter);
+
+                printWriter.println("Full Name: " + model.getStudentName().getFirstName() + " " + model.getStudentName().getFamilyName());
+                printWriter.println("PNumber: " + model.getPnumber());
+                printWriter.println("Email: " + model.getEmail());
+                printWriter.println("Submission Date: " + model.getSubmissionDate());
+                printWriter.println("Course: " + model.getCourseOfStudy());
+
+                printWriter.println("\n" + "Selected Modules:");
+                printWriter.println("==========" + "\n");
+
+                for (Module m : model.getAllSelectedModules()) {
+                    printWriter.println(m.toString());
+                    printWriter.println("credits: " + m.getCredits() + ", " + "Mandatory on your course? " + m.isMandatory() + ", " + "Delivery: " + m.getRunPlan() + "\n");
+                }
+
+                printWriter.close();
+                alertDialogBuilder(AlertType.INFORMATION, "Data Saved", null, "Your course selected has been saved");
+            } catch (IOException e) {
+                e.printStackTrace();
+                alertDialogBuilder(AlertType.ERROR, "Error", null, e.getMessage());
+            } catch (NullPointerException e) {
+                System.out.println("Dialog was cancelled");
+            }
         }
     }
 
@@ -193,84 +390,128 @@ public class OptionsModuleChooserController {
         @Override
         public void handle(Event event) {
 
-            model.clearAllSelectedModules();
-            
-            for (Module m : term1SelectionPane.getAllSelectedModules()) {
-                model.addToSelectedModules(m);
-            }
-            
-            for (Module m : term2SelectionPane.getAllSelectedModules()) {
-                model.addToSelectedModules(m);
-            }
+            //model.clearAllSelectedModules();
+            overviewViewPane.clearResults();
 
-            System.out.println(model.getAllSelectedModules());
-            
-            view.changeTab(2);
-            view.enableTab(view.getCreateOverviewTab());
-        }
-    }
-
-    public class ResetModulesHandler implements EventHandler {
-        @Override
-        public void handle(Event event) {
-            model.clearAllSelectedModules();
-        }
-    }
-
-    public class AddTerm1Handler implements EventHandler {
-        @Override
-        public void handle(Event event) {
-            if (term1SelectionPane.getAllSelectedModules().contains(term1SelectionPane.getUnSelectedModule())) {
-                alertDialogBuilder(AlertType.ERROR, "Duplicate Module", "Already Exists", "That module has already been added, please select another one");
+            if (term1SelectionPane.getCredits() < term1SelectionPane.getCreditLimit()) {
+                alertDialogBuilder(AlertType.ERROR, "Not enough modules", null, "Please select more modules for Term 1");
+            } else if (term2SelectionPane.getCredits() < term2SelectionPane.getCreditLimit()) {
+                alertDialogBuilder(AlertType.ERROR, "Not enough modules", null, "Please select more modules for Term 2");
             } else {
-                term1SelectionPane.addToSelectedList(term1SelectionPane.getUnSelectedModule());
-                int currentVal = Integer.parseInt(term1SelectionPane.getTermSelectionButtonPane().getCreditsTxtField());
-                int newVal = term1SelectionPane.getUnSelectedModule().getCredits() + currentVal;
-                term1SelectionPane.getTermSelectionButtonPane().setCreditsTxtField(String.valueOf(newVal));
-            }
-        }
-    }
+                overviewViewPane.setResults("Name: " + model.getStudentName().getFullName() + "\n");
+                overviewViewPane.setResults("PNumber: " + model.getPnumber() + "\n");
+                overviewViewPane.setResults("Email: " + model.getEmail() + "\n");
+                overviewViewPane.setResults("Date: " + model.getSubmissionDate() + "\n");
+                overviewViewPane.setResults("Course: " + model.getCourseOfStudy() + "\n");
 
-    public class AddTerm2Handler implements EventHandler {
-        @Override
-        public void handle(Event event) {
-            if (term2SelectionPane.getAllSelectedModules().contains(term2SelectionPane.getUnSelectedModule())) {
-                alertDialogBuilder(AlertType.ERROR, "Duplicate Module", "Already Exists", "That module has already been added, please select another one");
-            } else {
-                if(Integer.parseInt(term2SelectionPane.getTermSelectionButtonPane().getCreditsTxtField()) < 60) {
-                    term2SelectionPane.addToSelectedList(term2SelectionPane.getUnSelectedModule());
-                    int currentVal = Integer.parseInt(term2SelectionPane.getTermSelectionButtonPane().getCreditsTxtField());
-                    int newVal = term2SelectionPane.getUnSelectedModule().getCredits() + currentVal;
-                    term2SelectionPane.getTermSelectionButtonPane().setCreditsTxtField(String.valueOf(newVal));
-                } else {
-                    alertDialogBuilder(AlertType.ERROR, "Max Modules", "Max Modules", "You have reached your limit");
+                overviewViewPane.setResults("\n" + "Selected modules:" + "\n");
+                overviewViewPane.setResults("==========" + "\n");
+
+                List<Module> test = model.getAllSelectedModules().stream().sorted(Comparator.comparing(Module::getRunPlan)).collect(toList());
+
+                for (Module m : test) {
+                    overviewViewPane.setResults(m.toString() + "\n");
+                    overviewViewPane.setResults("credits: " + m.getCredits() + ", " + "Mandatory on your course? " + m.isMandatory() + ", " + "Delivery: " + m.getRunPlan() + "\n\n");
                 }
 
+                view.changeTab(2);
+                view.enableTab(view.getCreateOverviewTab());
             }
         }
     }
 
-    public class RemoveTerm1SelectedModuleHandler implements EventHandler {
-
+    public class StudentProfilesHandler implements EventHandler {
         @Override
         public void handle(Event event) {
-            if (term1SelectionPane.getSelectedModule().isMandatory()) {
-                alertDialogBuilder(AlertType.ERROR, "Mandatory Module", "Mandatory Module", "You cannot remove a mandatory module");
+            model.getAllSelectedModules().clear();
+            view.getModuleSelectionViewPane().resetAll();
+
+            // Email validation - check if the email is valid
+            if (studentProfileViewPane.isEmailValid()) {
+
+                model.setCourseOfStudy(studentProfileViewPane.getSelectedCourse());
+                model.setEmail(studentProfileViewPane.getTxtEmail());
+                model.setPnumber(studentProfileViewPane.getTxtPNumber());
+                model.setStudentName(new Name(studentProfileViewPane.getTxtFirstName(), studentProfileViewPane.getTxtSurname()));
+                model.setSubmissionDate(studentProfileViewPane.getDate());
+
+                populateTermModulesViews();
+
+                view.changeTab(1);
+                view.enableTab(view.getCreateCourseSelectionTab());
+                optionsModuleChooserMenuBar.enableMenuItem(optionsModuleChooserMenuBar.getSaveItem());
             } else {
-                term1SelectionPane.removeSelectedItem();
+                studentProfileViewPane.setInvalidEmailMessage("Enter a valid email address");
             }
         }
     }
 
-    public class RemoveTerm2SelectedModuleHandler implements EventHandler {
+    public class LoadCoursesHandler implements EventHandler {
 
         @Override
         public void handle(Event event) {
-            if (term2SelectionPane.getSelectedModule().isMandatory()) {
-                alertDialogBuilder(AlertType.ERROR, "Mandatory Module", "Mandatory Module", "You cannot remove a mandatory module");
-            } else {
-                term2SelectionPane.removeSelectedItem();
+            //Scanner out;
+            //
+            //try {
+            //    out = new Scanner(new File("courses.txt"));
+            //    out.useDelimiter("[,\r\n]+");
+            //
+            //    while (out.hasNext()) {
+            //
+            //        Course course = new Course(out.next());
+            //        String courseCode = out.next();
+            //        String courseName = out.next();
+            //        int credits = Integer.parseInt(out.next());
+            //        boolean mandatory = Boolean.parseBoolean(out.next());
+            //        Delivery delivery = Delivery.valueOf(out.next().toUpperCase());
+            //
+            //        Module module = new Module(courseCode, courseName, credits, mandatory, delivery);
+            //        courses.put(course, module);
+            //
+            //    }
+            //    out.close();
+            //
+            //
+            //
+            //} catch (FileNotFoundException e) {
+            //    e.printStackTrace();
+            //}
+
+
+        }
+    }
+
+    public class DoubleMouseClickSelectionHandler implements EventHandler<MouseEvent> {
+
+        TermSelectionViewPane termSelectionViewPane;
+
+        public DoubleMouseClickSelectionHandler(TermSelectionViewPane termSelectionViewPane) {
+            this.termSelectionViewPane = termSelectionViewPane;
+        }
+
+        @Override
+        public void handle(MouseEvent event) {
+            if (event.getClickCount() == 2) {
+                if (model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
+                    alertDialogBuilder(AlertType.ERROR, "Duplicate Module", null, "Module already added");
+                } else {
+                    addModuleToListAndUpdateCredits(termSelectionViewPane);
+                }
             }
+        }
+    }
+
+    public class TextFieldLimitListener implements ChangeListener<String> {
+
+        private int maxLength;
+
+        public TextFieldLimitListener(int maxLength) {
+            this.maxLength = maxLength;
+        }
+
+        @Override
+        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+            if (newValue.length() > maxLength) ((StringProperty) observable).setValue(oldValue);
         }
     }
 
@@ -283,4 +524,26 @@ public class OptionsModuleChooserController {
         alert.showAndWait();
     }
 
+    public File saveDialogBuilder(String title, String description, String extension) throws NullPointerException {
+        FileChooser fc = new FileChooser();
+        fc.setTitle(title);
+        fc.setInitialDirectory(new File(Paths.get("").toUri()));
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(description, "*." + extension.toLowerCase());
+        fc.getExtensionFilters().add(extFilter);
+        File selectedFile = fc.showSaveDialog(null);
+
+        return selectedFile;
+
+    }
+
+    public File openDialogBuilder(String title, String description, String extension) throws NullPointerException {
+        FileChooser fc = new FileChooser();
+        fc.setTitle(title);
+        fc.setInitialDirectory(new File(Paths.get("").toUri()));
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(description, "*." + extension);
+        fc.getExtensionFilters().add(extFilter);
+        File selectedFile = fc.showOpenDialog(null);
+
+        return selectedFile;
+    }
 }

@@ -1,14 +1,17 @@
 package view;
 
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+
+import javafx.event.ActionEvent;
 import model.Module;
+import model.Delivery;
+import javafx.geometry.Insets;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.event.EventHandler;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Priority;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.control.ListView;
 
 public class TermSelectionViewPane extends VBox {
 
@@ -43,7 +46,7 @@ public class TermSelectionViewPane extends VBox {
 
         HBox buttonPaneContainer = new HBox();
         termSelectionButtonPane = new TermSelectionButtonPane();
-        termSelectionButtonPane.setCreditsTxtField("0");
+        termSelectionButtonPane.setCredits(0);
         buttonPaneContainer.getChildren().add(termSelectionButtonPane);
 
         this.setPrefHeight(50);
@@ -54,57 +57,89 @@ public class TermSelectionViewPane extends VBox {
         this.getChildren().addAll(selectionContainer, buttonPaneContainer);
     }
 
-    public ObservableList<Module> getAllSelectedModules() {
-        return selectedTermModulesList.getItems();
+    public void resetListsAndCredits() {
+        selectedTermModulesList.getItems().clear();
+        unselectedTermModulesList.getItems().clear();
+        termSelectionButtonPane.setCredits(0);
     }
 
-    public void clearAllListViews() {
-        this.unselectedTermModulesList.getItems().clear();
-        this.selectedTermModulesList.getItems().clear();
+    // Delegation to ButtonPane
+    public int getCreditLimit() {
+        return termSelectionButtonPane.getCreditLimit();
     }
 
-    public void addToUnselectedList(Module m) {
-        unselectedTermModulesList.getItems().add(m);
+    public void increaseCreditsBy(int value) {
+        int newVal = value + termSelectionButtonPane.getCredits();
+        termSelectionButtonPane.setCredits(newVal);
+        //setCredits(getCredits() + getSelectedItem().getCredits());
     }
 
-    public void addToSelectedList(Module m) {
-        selectedTermModulesList.getItems().add(m);
+    public void decreaseCreditsBy(int value) {
+        termSelectionButtonPane.setCredits(value - getSelectedItem().getCredits());
     }
 
-    // Getter and Setters Methods
-    public Label getSelectedTermModulesLabel() {
-        return selectedTermModulesLabel;
+    public int getCredits() {
+        return termSelectionButtonPane.getCredits();
     }
 
-    public Label getUnselectedTermModulesLabel() {
-        return unselectedTermModulesLabel;
+    public void setCreditLimit(int creditLimit) {
+        termSelectionButtonPane.setCreditLimit(creditLimit);
     }
 
-    public TermSelectionButtonPane getTermSelectionButtonPane() {
-        return termSelectionButtonPane;
+    public void removeSelectedItem() {
+        unselectedTermModulesList.getItems().add(selectedTermModulesList.getSelectionModel().getSelectedItem());
+        selectedTermModulesList.getItems().remove(selectedTermModulesList.getSelectionModel().getSelectedItem());
+    }
+
+    public Module getSelectedItem() {
+        return selectedTermModulesList.getSelectionModel().getSelectedItem();
+    }
+
+    public void addToUnselectedList(Module module, Delivery term) {
+        if (module.getRunPlan() == term && !module.isMandatory()) {
+            unselectedTermModulesList.getItems().add(module);
+        }
+    }
+
+    //public void addToUnselectedList(Module module) {
+    //    unselectedTermModulesList.getItems().add(module);
+    //}
+
+    public void addDoubleMouseClickSelectionHandler(EventHandler<MouseEvent> handler) {
+        unselectedTermModulesList.setOnMouseClicked(handler);
+    }
+
+    public void removeModuleFromList(Module module) {
+        unselectedTermModulesList.getItems().remove(module);
+    }
+
+    //public TermSelectionButtonPane getTermSelectionButtonPane() {
+    //    return termSelectionButtonPane;
+    //}
+
+    public void addToSelectedList(Module module) {
+        selectedTermModulesList.getItems().add(module);
+    }
+
+    public void setSelectedTermModulesLabel(String text) {
+        this.selectedTermModulesLabel.setText(text);
+    }
+
+    public void setUnselectedTermModulesLabel(String text) {
+        this.unselectedTermModulesLabel.setText(text);
     }
 
     public Module getUnSelectedModule() {
         return unselectedTermModulesList.getSelectionModel().getSelectedItem();
     }
 
-    public Module getSelectedModule() {
-        return selectedTermModulesList.getSelectionModel().getSelectedItem();
+    // Handlers below
+    public void addAddHandler(EventHandler<ActionEvent> handler) {
+        termSelectionButtonPane.getAddBtn().setOnAction(handler);
     }
 
-    public void removeSelectedItem() {
-        int index = selectedTermModulesList.getSelectionModel().getSelectedIndex();
-
-        if (index != -1) {
-            selectedTermModulesList.getItems().remove(index);
-        } else {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Selection Error");
-            alert.setContentText("Please select an item to remove.");
-            alert.showAndWait();
-        }
-
+    public void addRemoveHandler(EventHandler<ActionEvent> handler) {
+        termSelectionButtonPane.getRemoveBtn().setOnAction(handler);
     }
 
 }

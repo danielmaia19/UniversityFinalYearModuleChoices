@@ -1,9 +1,10 @@
 package model;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 
-public class Module implements Comparable<Module> {
+public class Module implements Comparable<Module>, Serializable {
 	
 	private String moduleCode;
 	private String moduleName;
@@ -58,8 +59,7 @@ public class Module implements Comparable<Module> {
 	public void setRunPlan(Delivery runPlan) {
 		this.runPlan = runPlan;
 	}
-	
-	
+
 	@Override
 	public String toString() {
 		//a non-standard toString that simply returns the module code and name,

@@ -1,30 +1,27 @@
 package view;
 
-import javafx.beans.binding.BooleanBinding;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.util.Callback;
+import javafx.beans.value.ChangeListener;
 import model.Course;
-import sun.plugin2.jvm.RemoteJVMLauncher;
+import javafx.geometry.Pos;
 
 import java.time.LocalDate;
-import java.time.MonthDay;
+
+import javafx.util.Callback;
+import javafx.scene.control.*;
+import javafx.geometry.Insets;
+import javafx.scene.layout.HBox;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.layout.GridPane;
+import javafx.beans.binding.BooleanBinding;
 
 public class StudentProfileViewPane extends GridPane {
 
+    private DatePicker date;
     private Button btnProfile;
     private Label emailValidation;
     private ComboBox<Course> cboCourses;
     private TextField txtSurname, txtFirstName, txtPNumber, txtEmail;
-
-    private DatePicker date;
 
     public StudentProfileViewPane() {
         //styling
@@ -32,21 +29,22 @@ public class StudentProfileViewPane extends GridPane {
         this.setVgap(15);
         this.setHgap(20);
         this.setAlignment(Pos.CENTER);
+        //this.setGridLinesVisible(true);
 
         emailValidation = new Label();
-        emailValidation.setStyle("-fx-text-fill: red; -fx-font-size: 16px;");
+        emailValidation.setStyle("-fx-text-fill: red; -fx-font-size: 13px;");
 
         date = new DatePicker();
         date.setDayCellFactory(new DisablePastDates());
         date.setEditable(false);
 
         //create labels
-        Label lblTitle = new Label("Select Course: ");
-        Label lblPNumber = new Label("Input P Number: ");
-        Label lblFirstName = new Label("Input first name: ");
-        Label lblSurname = new Label("Input surname: ");
-        Label lblEmail = new Label("Input email: ");
-        Label lblDate = new Label("Input date: ");
+        Label lblCourse = new Label("Select Course: ");
+        Label lblPNumber = new Label("P Number: ");
+        Label lblFirstName = new Label("First Name: ");
+        Label lblSurname = new Label("Surname: ");
+        Label lblEmail = new Label("Email: ");
+        Label lblDate = new Label("Submission Date: ");
 
         // setup combobox
         cboCourses = new ComboBox<>();
@@ -62,7 +60,7 @@ public class StudentProfileViewPane extends GridPane {
         btnProfile.setDisable(true);
 
         //add controls and labels to container
-        this.add(lblTitle, 0, 0);
+        this.add(lblCourse, 0, 0);
         this.add(cboCourses, 1, 0);
 
         this.add(lblPNumber, 0, 1);
@@ -86,42 +84,10 @@ public class StudentProfileViewPane extends GridPane {
         this.add(emailValidation, 1, 7);
     }
 
-    // Get Methods
-    public TextField getTxtSurname() {
-        return txtSurname;
-    }
-    public TextField getTxtFirstName() {
-        return txtFirstName;
-    }
-    public TextField getTxtPNumber() {
-        return txtPNumber;
-    }
-    public TextField getTxtEmail() {
-        return txtEmail;
-    }
-    public Course getSelectedCourse() {
-        return cboCourses.getSelectionModel().getSelectedItem();
-    }
-    public DatePicker getDate() {
-        return date;
-    }
-
-    // Set methods
-    public void setEmailInvalidMessage(String message) {
-        emailValidation.setText(message);
-    }
-
-    public void populateComboBoxWithCourses(Course[] courses) {
-        cboCourses.getItems().addAll(courses);
-        cboCourses.getSelectionModel().select(0); //select first opponent by default
-    }
-
-    public void addCreateStudentProfileHandler(EventHandler<ActionEvent> handler) {
-        btnProfile.setOnAction(handler);
-    }
-
-    public void addBtnDisableBind(BooleanBinding property) {
-        btnProfile.disableProperty().bind(property);
+    // Used regular expressions to validate email address
+    public boolean isEmailValid() {
+        return txtEmail.getText().matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+                + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
     }
 
     public BooleanBinding isEitherFieldEmpty() {
@@ -132,6 +98,88 @@ public class StudentProfileViewPane extends GridPane {
                 .or(date.valueProperty().isNull());
     }
 
+    public LocalDate getDate() {
+        return date.getValue();
+    }
+
+    public String getTxtEmail() {
+        return txtEmail.getText();
+    }
+
+    public String getTxtPNumber() {
+        return txtPNumber.getText();
+    }
+
+    public String getTxtSurname() {
+        return txtSurname.getText();
+    }
+
+    public void populateComboBoxWithCourses(Course[] courses) {
+        cboCourses.getItems().addAll(courses);
+        cboCourses.getSelectionModel().select(0);
+    }
+
+    public void setDate(LocalDate date) {
+        this.date.setValue(date);
+    }
+
+    public String getTxtFirstName() {
+        return txtFirstName.getText();
+    }
+
+    public void setTxtEmail(String txtEmail) {
+        this.txtEmail.setText(txtEmail);
+    }
+
+    public void setTxtSurname(String txtSurname) {
+        this.txtSurname.setText(txtSurname);
+    }
+
+    public void setTxtPNumber(String txtPNumber) {
+        this.txtPNumber.setText(txtPNumber);
+    }
+
+    public void setInvalidEmailMessage(String message) {
+        emailValidation.setText(message);
+    }
+
+    public void setTxtFirstName(String txtFirstName) {
+        this.txtFirstName.setText(txtFirstName);
+    }
+
+    public Course getSelectedCourse() {
+        return cboCourses.getSelectionModel().getSelectedItem();
+    }
+
+    public void setSelectedCourse(Course course) {
+        cboCourses.getSelectionModel().select(course);
+    }
+
+    public void addBtnDisableBind(BooleanBinding property) {
+        btnProfile.disableProperty().bind(property);
+    }
+
+    // Event Handlers
+    public void addCreateStudentProfileHandler(EventHandler<ActionEvent> handler) {
+        btnProfile.setOnAction(handler);
+    }
+
+    // Change listeners
+    public void addPNumberChangeListener(ChangeListener<String> handler) {
+        txtPNumber.textProperty().addListener(handler);
+    }
+
+    public void addFirstNameChangeListener(ChangeListener<String> handler) {
+        txtFirstName.textProperty().addListener(handler);
+    }
+
+    public void addSurnameChangeListener(ChangeListener<String> handler) {
+        txtSurname.textProperty().addListener(handler);
+    }
+
+    // Disables past dates on the datepicker
+    // Reference from here:
+    // https://docs.oracle.com/javase/8/javafx/api/javafx/scene/control/DatePicker.html#setDayCellFactory-javafx.util.Callback-
     private class DisablePastDates implements Callback<DatePicker, DateCell> {
         @Override
         public DateCell call(DatePicker param) {
@@ -139,7 +187,7 @@ public class StudentProfileViewPane extends GridPane {
                 @Override
                 public void updateItem(LocalDate item, boolean empty) {
                     super.updateItem(item, empty);
-                    if (empty || item.compareTo(LocalDate.now()) < 0 ) {
+                    if (empty || item.compareTo(LocalDate.now()) < 0) {
                         setDisable(true);
                     }
                 }

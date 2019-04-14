@@ -8,12 +8,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.*;
 
-public class OverviewSelectionPane extends VBox {
+public class OverviewViewPane extends VBox {
 
     private TextArea overview;
     private Button saveOverviewBtn;
 
-    public OverviewSelectionPane() {
+    public OverviewViewPane() {
 
         // Setting the padding for this VBox
         this.setPadding(new Insets(30, 30, 30, 30));
@@ -22,7 +22,7 @@ public class OverviewSelectionPane extends VBox {
         VBox overviewBox = new VBox();
         overviewBox.setMinHeight(300);
         overviewBox.setMinHeight(400);
-        overview = new TextArea("Overview will appear here...");
+        overview = new TextArea();
         overview.setEditable(false);
         overviewBox.getChildren().add(overview);
 
@@ -38,8 +38,12 @@ public class OverviewSelectionPane extends VBox {
         this.getChildren().addAll(overviewBox, button);
     }
 
+    public void clearResults() {
+        overview.clear();
+    }
+
     public void setResults(String overviewText) {
-        overview.setText(overviewText);
+        overview.appendText(overviewText);
     }
 
     public void addSaveOverviewHandler(EventHandler<ActionEvent> handler) {

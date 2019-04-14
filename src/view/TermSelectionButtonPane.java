@@ -2,7 +2,6 @@ package view;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -12,9 +11,11 @@ import javafx.scene.layout.Priority;
 
 public class TermSelectionButtonPane extends HBox {
 
-    private Label credits;
-    private Button addBtn, removeBtn;
-    private TextField creditsTxtField;
+    private int creditLimit;
+    private Label lblCredits;
+    private TextField credits;
+    private Button addBtn;
+    private Button removeBtn;
 
     public TermSelectionButtonPane() {
 
@@ -25,26 +26,36 @@ public class TermSelectionButtonPane extends HBox {
 
         addBtn = new Button("Add");
         removeBtn = new Button("Remove");
-        credits = new Label("Total Credits:");
-        creditsTxtField = new TextField("0");
-        creditsTxtField.setPrefWidth(50);
-        creditsTxtField.setEditable(false);
+        lblCredits = new Label("Total Credits:");
+        credits = new TextField("0");
+        credits.setPrefWidth(50);
+        credits.setEditable(false);
 
-        this.getChildren().addAll(addBtn, removeBtn, credits, creditsTxtField);
-    }
-
-    public String getCreditsTxtField() {
-        return creditsTxtField.getText();
-    }
-    public void setCreditsTxtField(String creditsTxtField) {
-        this.creditsTxtField.setText(creditsTxtField);
+        this.getChildren().addAll(addBtn, removeBtn, lblCredits, credits);
     }
 
-    public void addAddHandler(EventHandler<ActionEvent> handler) {
-        addBtn.setOnAction(handler);
+    public int getCreditLimit() {
+        return creditLimit;
     }
-    public void addRemoveHandler(EventHandler<ActionEvent> handler) {
-        removeBtn.setOnAction(handler);
+
+    public void setCreditLimit(int creditLimit) {
+        this.creditLimit = creditLimit;
+    }
+
+    public int getCredits() {
+        return Integer.parseInt(credits.getText());
+    }
+
+    public void setCredits(int value) {
+        credits.setText(String.valueOf(value));
+    }
+
+    public Button getAddBtn() {
+        return addBtn;
+    }
+
+    public Button getRemoveBtn() {
+        return removeBtn;
     }
 
 }

@@ -9,27 +9,27 @@ import javafx.scene.layout.BorderPane;
 public class OptionsModuleChooserRootPane extends BorderPane {
 
     private TabPane tabPane;
-    private ProfileMenuBar menuBar;
+    private OverviewViewPane overviewViewPane;
+    private OptionsModuleChooserMenuBar menuBar;
     private StudentProfileViewPane studentProfileViewPane;
-    private ModuleSelectionPane moduleSelectionPane;
-    private OverviewSelectionPane overviewSelectionPane;
+    private ModuleSelectionViewPane moduleSelectionViewPane;
     private Tab createProfileTab, createCourseSelectionTab, createOverviewTab;
 
     public OptionsModuleChooserRootPane() {
         tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
-        menuBar = new ProfileMenuBar();
+        menuBar = new OptionsModuleChooserMenuBar();
         studentProfileViewPane = new StudentProfileViewPane();
-        overviewSelectionPane = new OverviewSelectionPane();
-        moduleSelectionPane = new ModuleSelectionPane();
+        overviewViewPane = new OverviewViewPane();
+        moduleSelectionViewPane = new ModuleSelectionViewPane();
 
         createProfileTab = new Tab("Create Profile", studentProfileViewPane);
 
-        createCourseSelectionTab = new Tab("Select Modules", moduleSelectionPane);
+        createCourseSelectionTab = new Tab("Select Modules", moduleSelectionViewPane);
         createCourseSelectionTab.setDisable(true);
 
-        createOverviewTab = new Tab("Overview Selection", overviewSelectionPane);
+        createOverviewTab = new Tab("Overview Selection", overviewViewPane);
         createOverviewTab.setDisable(true);
 
         //add tabs to tab pane
@@ -39,39 +39,42 @@ public class OptionsModuleChooserRootPane extends BorderPane {
         this.setCenter(tabPane);
     }
 
-    //method to allow the controller to change tabs
-    public void changeTab(int index) {
-        tabPane.getSelectionModel().select(index);
-    }
-
     public void enableTab(Tab tab) {
         tab.setDisable(false);
     }
+
+    // Here if required, but not used
     public void disableTab(Tab tab) {
-        tab.setDisable(true);
+        tab.setDisable(false);
+    }
+
+    public Tab getCreateOverviewTab() {
+        return createOverviewTab;
+    }
+
+    public OptionsModuleChooserMenuBar getMenuBar() {
+        return menuBar;
     }
 
     public Tab getCreateCourseSelectionTab() {
         return createCourseSelectionTab;
     }
-    public Tab getCreateOverviewTab() {
-        return createOverviewTab;
-    }
-    public Tab getCreateProfileTab() {
-        return createProfileTab;
+
+    // Change tabs
+    public void changeTab(int index) {
+        tabPane.getSelectionModel().select(index);
     }
 
-    public ProfileMenuBar getMenuBar() {
-        return menuBar;
+    public OverviewViewPane getOverviewViewPane() {
+        return overviewViewPane;
     }
+
     public StudentProfileViewPane getStudentProfileViewPane() {
         return studentProfileViewPane;
     }
-    public ModuleSelectionPane getModuleSelectionPane() {
-        return moduleSelectionPane;
-    }
-    public OverviewSelectionPane getOverviewSelectionPane() {
-        return overviewSelectionPane;
+
+    public ModuleSelectionViewPane getModuleSelectionViewPane() {
+        return moduleSelectionViewPane;
     }
 
 }
