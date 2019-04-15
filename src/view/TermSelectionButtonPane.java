@@ -1,22 +1,28 @@
 package view;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Button;
 import javafx.scene.layout.Priority;
+import javafx.scene.control.TextField;
 
+/**
+ *
+ * @author P1718603X
+ */
 public class TermSelectionButtonPane extends HBox {
 
+    // Fields
     private int creditLimit;
     private Label lblCredits;
     private TextField credits;
-    private Button addBtn;
-    private Button removeBtn;
+    private Button addBtn, removeBtn;
 
+    // Constructors
+    /**
+     *
+     */
     public TermSelectionButtonPane() {
 
         HBox.setHgrow(this, Priority.ALWAYS);
@@ -34,12 +40,17 @@ public class TermSelectionButtonPane extends HBox {
         this.getChildren().addAll(addBtn, removeBtn, lblCredits, credits);
     }
 
-    public int getCreditLimit() {
-        return creditLimit;
+    // Methods
+    public Button getAddBtn() {
+        return addBtn;
     }
 
-    public void setCreditLimit(int creditLimit) {
-        this.creditLimit = creditLimit;
+    public Button getRemoveBtn() {
+        return removeBtn;
+    }
+
+    public int getCreditLimit() {
+        return creditLimit;
     }
 
     public int getCredits() {
@@ -50,12 +61,7 @@ public class TermSelectionButtonPane extends HBox {
         credits.setText(String.valueOf(value));
     }
 
-    public Button getAddBtn() {
-        return addBtn;
+    public void setCreditLimit(int creditLimit) {
+        this.creditLimit = creditLimit;
     }
-
-    public Button getRemoveBtn() {
-        return removeBtn;
-    }
-
 }
