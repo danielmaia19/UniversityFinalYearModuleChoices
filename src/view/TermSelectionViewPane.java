@@ -224,12 +224,21 @@ public class TermSelectionViewPane extends VBox {
     }
 
     /**
+     * Sets a set on mouse click event on double clicks to unselected modules.
+     *
+     * @param handler is passed as a EventHandler of Mouse Event to perform a task on double clicks on modules.
+     */
+    public void addDoubleMouseAddClickSelectionHandler(EventHandler<MouseEvent> handler) {
+        unselectedTermModulesList.setOnMouseClicked(handler);
+    }
+
+    /**
      * Sets a set on mouse click event on double clicks to selected modules.
      *
      * @param handler is passed as a EventHandler of Mouse Event to perform a task on double clicks on modules.
      */
-    public void addDoubleMouseClickSelectionHandler(EventHandler<MouseEvent> handler) {
-        unselectedTermModulesList.setOnMouseClicked(handler);
+    public void addDoubleMouseRemoveClickSelectionHandler(EventHandler<MouseEvent> handler) {
+        selectedTermModulesList.setOnMouseClicked(handler);
     }
 
 }
