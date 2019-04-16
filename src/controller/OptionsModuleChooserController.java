@@ -1,34 +1,49 @@
 package controller;
 
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import view.*;
+import model.*;
+import java.io.*;
+import java.util.*;
 import javafx.event.Event;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import javafx.stage.FileChooser;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.*;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.FileChooser;
-import model.*;
-import view.*;
-
-import java.io.*;
-import java.nio.file.Paths;
-import java.util.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.beans.property.StringProperty;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * As the controller, you will find all the logic to the application here, with all the handlers.
+ * bindings and listeners.
+ *
+ * @author P1718603X
+ */
 public class OptionsModuleChooserController {
 
+    // Fields
+    List<Module> courseModules;
     private StudentProfile model;
     private OptionsModuleChooserRootPane view;
     private OverviewViewPane overviewViewPane;
-    private TermSelectionViewPane term1SelectionPane;
-    private TermSelectionViewPane term2SelectionPane;
     private StudentProfileViewPane studentProfileViewPane;
     private ModuleSelectionViewPane moduleSelectionViewPane;
     private OptionsModuleChooserMenuBar optionsModuleChooserMenuBar;
+    private TermSelectionViewPane term1SelectionPane, term2SelectionPane;
 
+    // Constructors
+
+    /**
+     * The constructor is used to pass the view and controller in the main application class.
+     *
+     * @param view  is passed to create the view of the application
+     * @param model is passed to create the model of the Student Profile.
+     */
     public OptionsModuleChooserController(OptionsModuleChooserRootPane view, StudentProfile model) {
         //initialise model and view fields
         this.model = model;
@@ -42,9 +57,9 @@ public class OptionsModuleChooserController {
         term2SelectionPane = view.getModuleSelectionViewPane().getTerm2SelectionViewPane();
 
         //populate combobox in create profile pane, e.g. if profilePane represented your create profile pane you could invoke the line below
-        studentProfileViewPane.populateComboBoxWithCourses(setupAndRetrieveCourses());
+        //studentProfileViewPane.populateComboBoxWithCourses(setupAndRetrieveCourses());
 
-        //attach event handlers to view using private helper method
+        // Attach Event Handlers
         this.attachEventHandlers();
 
         // Attach Bindings
@@ -55,10 +70,20 @@ public class OptionsModuleChooserController {
 
     }
 
+    // Methods
+
+    /**
+     * Creates the Bindings needed for the application and
+     * attaches the Bindings in the constructor.
+     */
     private void attachBindings() {
         studentProfileViewPane.addBtnDisableBind(studentProfileViewPane.isEitherFieldEmpty());
     }
 
+    /**
+     * Creates the Events Handlers needed for the application and
+     * attaches the Event Handlers in the constructors.
+     */
     private void attachEventHandlers() {
         optionsModuleChooserMenuBar.addAboutHandler(a -> alertDialogBuilder(AlertType.INFORMATION, "Information Dialog", null, "Options Module Chooser MVC app v1.0"));
         optionsModuleChooserMenuBar.addExitHandler(e -> System.exit(0));
@@ -87,18 +112,23 @@ public class OptionsModuleChooserController {
         optionsModuleChooserMenuBar.addLoadCourseDataHandler(new LoadCoursesHandler());
     }
 
+    /**
+     * Creates the Change Listeners needed for the application and
+     * attaches the Change Listeners in the constructors.
+     */
     private void attachChangeListeners() {
-        studentProfileViewPane.addPNumberChangeListener(new TextFieldLimitListener(8));
+        studentProfileViewPane.addPNumberChangeListener(new TextFieldLimitListener(10));
         studentProfileViewPane.addFirstNameChangeListener(new TextFieldLimitListener(30));
         studentProfileViewPane.addSurnameChangeListener(new TextFieldLimitListener(30));
     }
 
-    // Populates the list views accordingly
-    // Also used to reset when ResentHandler is used
-    public void populateTermModulesViews() {
-        List<Module> collect = new ArrayList<>(studentProfileViewPane.getSelectedCourse().getAllModulesOnCourse());
-
-        for (Module m : collect) {
+    /**
+     * Populates the list views accordingly
+     * Also used to reset when ResetHandler is used.
+     */
+    private void populateTermModulesViews() {
+        courseModules = new ArrayList<>(studentProfileViewPane.getSelectedCourse().getAllModulesOnCourse());
+        for (Module m : courseModules) {
             if (m.getRunPlan() == Delivery.YEAR_LONG) {
                 moduleSelectionViewPane.addYearLongModule(m);
                 model.addToSelectedModules(m);
@@ -120,80 +150,79 @@ public class OptionsModuleChooserController {
 
             term1SelectionPane.addToUnselectedList(m, Delivery.TERM_1);
             term2SelectionPane.addToUnselectedList(m, Delivery.TERM_2);
-
         }
     }
 
-    private Course[] setupAndRetrieveCourses() {
-        Module imat3423 = new Module("IMAT3423", "Systems Building: Methods", 15, true, Delivery.TERM_1);
-        Module imat3451 = new Module("IMAT3451", "Computing Project", 30, true, Delivery.YEAR_LONG);
-        Module ctec3902_SoftEng = new Module("CTEC3902", "Rigorous Systems", 15, true, Delivery.TERM_2);
-        Module ctec3902_CompSci = new Module("CTEC3902", "Rigorous Systems", 15, false, Delivery.TERM_2);
-        Module ctec3110 = new Module("CTEC3110", "Secure Web Application Development", 15, false, Delivery.TERM_1);
-        Module ctec3426 = new Module("CTEC3426", "Telematics", 15, false, Delivery.TERM_1);
-        Module ctec3605 = new Module("CTEC3605", "Multi-service Networks 1", 15, false, Delivery.TERM_1);
-        Module ctec3606 = new Module("CTEC3606", "Multi-service Networks 2", 15, false, Delivery.TERM_2);
-        Module ctec3410 = new Module("CTEC3410", "Web Application Penetration Testing", 15, false, Delivery.TERM_2);
-        Module ctec3904 = new Module("CTEC3904", "Functional Software Development", 15, false, Delivery.TERM_2);
-        Module ctec3905 = new Module("CTEC3905", "Front-End Web Development", 15, false, Delivery.TERM_2);
-        Module ctec3906 = new Module("CTEC3906", "Interaction Design", 15, false, Delivery.TERM_1);
-        Module imat3410 = new Module("IMAT3104", "Database Management and Programming", 15, false, Delivery.TERM_2);
-        Module imat3406 = new Module("IMAT3406", "Fuzzy Logic and Knowledge Based Systems", 15, false, Delivery.TERM_1);
-        Module imat3611 = new Module("IMAT3611", "Popular Technology Ethics", 15, false, Delivery.TERM_1);
-        Module imat3613 = new Module("IMAT3613", "Data Mining", 15, false, Delivery.TERM_1);
-        Module imat3614 = new Module("IMAT3614", "Big Data and Business Models", 15, false, Delivery.TERM_2);
-        Module imat3428_CompSci = new Module("IMAT3428", "Information Technology Services Practice", 15, false, Delivery.TERM_2);
-
-        Course compSci = new Course("Computer Science");
-        compSci.addModuleToCourse(imat3423);
-        compSci.addModuleToCourse(imat3451);
-        compSci.addModuleToCourse(ctec3902_CompSci);
-        compSci.addModuleToCourse(ctec3110);
-        compSci.addModuleToCourse(ctec3426);
-        compSci.addModuleToCourse(ctec3605);
-        compSci.addModuleToCourse(ctec3606);
-        compSci.addModuleToCourse(ctec3410);
-        compSci.addModuleToCourse(ctec3904);
-        compSci.addModuleToCourse(ctec3905);
-        compSci.addModuleToCourse(ctec3906);
-        compSci.addModuleToCourse(imat3410);
-        compSci.addModuleToCourse(imat3406);
-        compSci.addModuleToCourse(imat3611);
-        compSci.addModuleToCourse(imat3613);
-        compSci.addModuleToCourse(imat3614);
-        compSci.addModuleToCourse(imat3428_CompSci);
-
-        Course softEng = new Course("Software Engineering");
-        softEng.addModuleToCourse(imat3423);
-        softEng.addModuleToCourse(imat3451);
-        softEng.addModuleToCourse(ctec3902_SoftEng);
-        softEng.addModuleToCourse(ctec3110);
-        softEng.addModuleToCourse(ctec3426);
-        softEng.addModuleToCourse(ctec3605);
-        softEng.addModuleToCourse(ctec3606);
-        softEng.addModuleToCourse(ctec3410);
-        softEng.addModuleToCourse(ctec3904);
-        softEng.addModuleToCourse(ctec3905);
-        softEng.addModuleToCourse(ctec3906);
-        softEng.addModuleToCourse(imat3410);
-        softEng.addModuleToCourse(imat3406);
-        softEng.addModuleToCourse(imat3611);
-        softEng.addModuleToCourse(imat3613);
-        softEng.addModuleToCourse(imat3614);
-
-        Course[] courses = new Course[2];
-        courses[0] = compSci;
-        courses[1] = softEng;
-
-        return courses;
-    }
+    //private Course[] setupAndRetrieveCourses() {
+    //    Module imat3423 = new Module("IMAT3423", "Systems Building: Methods", 15, true, Delivery.TERM_1);
+    //    Module imat3451 = new Module("IMAT3451", "Computing Project", 30, true, Delivery.YEAR_LONG);
+    //    Module ctec3902_SoftEng = new Module("CTEC3902", "Rigorous Systems", 15, true, Delivery.TERM_2);
+    //    Module ctec3902_CompSci = new Module("CTEC3902", "Rigorous Systems", 15, false, Delivery.TERM_2);
+    //    Module ctec3110 = new Module("CTEC3110", "Secure Web Application Development", 15, false, Delivery.TERM_1);
+    //    Module ctec3426 = new Module("CTEC3426", "Telematics", 15, false, Delivery.TERM_1);
+    //    Module ctec3605 = new Module("CTEC3605", "Multi-service Networks 1", 15, false, Delivery.TERM_1);
+    //    Module ctec3606 = new Module("CTEC3606", "Multi-service Networks 2", 15, false, Delivery.TERM_2);
+    //    Module ctec3410 = new Module("CTEC3410", "Web Application Penetration Testing", 15, false, Delivery.TERM_2);
+    //    Module ctec3904 = new Module("CTEC3904", "Functional Software Development", 15, false, Delivery.TERM_2);
+    //    Module ctec3905 = new Module("CTEC3905", "Front-End Web Development", 15, false, Delivery.TERM_2);
+    //    Module ctec3906 = new Module("CTEC3906", "Interaction Design", 15, false, Delivery.TERM_1);
+    //    Module imat3410 = new Module("IMAT3104", "Database Management and Programming", 15, false, Delivery.TERM_2);
+    //    Module imat3406 = new Module("IMAT3406", "Fuzzy Logic and Knowledge Based Systems", 15, false, Delivery.TERM_1);
+    //    Module imat3611 = new Module("IMAT3611", "Popular Technology Ethics", 15, false, Delivery.TERM_1);
+    //    Module imat3613 = new Module("IMAT3613", "Data Mining", 15, false, Delivery.TERM_1);
+    //    Module imat3614 = new Module("IMAT3614", "Big Data and Business Models", 15, false, Delivery.TERM_2);
+    //    Module imat3428_CompSci = new Module("IMAT3428", "Information Technology Services Practice", 15, false, Delivery.TERM_2);
+    //
+    //    Course compSci = new Course("Computer Science");
+    //    compSci.addModuleToCourse(imat3423);
+    //    compSci.addModuleToCourse(imat3451);
+    //    compSci.addModuleToCourse(ctec3902_CompSci);
+    //    compSci.addModuleToCourse(ctec3110);
+    //    compSci.addModuleToCourse(ctec3426);
+    //    compSci.addModuleToCourse(ctec3605);
+    //    compSci.addModuleToCourse(ctec3606);
+    //    compSci.addModuleToCourse(ctec3410);
+    //    compSci.addModuleToCourse(ctec3904);
+    //    compSci.addModuleToCourse(ctec3905);
+    //    compSci.addModuleToCourse(ctec3906);
+    //    compSci.addModuleToCourse(imat3410);
+    //    compSci.addModuleToCourse(imat3406);
+    //    compSci.addModuleToCourse(imat3611);
+    //    compSci.addModuleToCourse(imat3613);
+    //    compSci.addModuleToCourse(imat3614);
+    //    compSci.addModuleToCourse(imat3428_CompSci);
+    //
+    //    Course softEng = new Course("Software Engineering");
+    //    softEng.addModuleToCourse(imat3423);
+    //    softEng.addModuleToCourse(imat3451);
+    //    softEng.addModuleToCourse(ctec3902_SoftEng);
+    //    softEng.addModuleToCourse(ctec3110);
+    //    softEng.addModuleToCourse(ctec3426);
+    //    softEng.addModuleToCourse(ctec3605);
+    //    softEng.addModuleToCourse(ctec3606);
+    //    softEng.addModuleToCourse(ctec3410);
+    //    softEng.addModuleToCourse(ctec3904);
+    //    softEng.addModuleToCourse(ctec3905);
+    //    softEng.addModuleToCourse(ctec3906);
+    //    softEng.addModuleToCourse(imat3410);
+    //    softEng.addModuleToCourse(imat3406);
+    //    softEng.addModuleToCourse(imat3611);
+    //    softEng.addModuleToCourse(imat3613);
+    //    softEng.addModuleToCourse(imat3614);
+    //
+    //    Course[] courses = new Course[2];
+    //    courses[0] = compSci;
+    //    courses[1] = softEng;
+    //
+    //    return courses;
+    //}
 
     /**
      * Add the selected module to the list and increase the credits accordingly
      *
-     * @param termSelectionViewPane - used to behave according to the view
+     * @param termSelectionViewPane used to behave according to the view passing a instance of TermSelectionView Pane.
      */
-    public void addModuleToListAndUpdateCredits(TermSelectionViewPane termSelectionViewPane) {
+    public void addModulesToListAndUpdateCredits(TermSelectionViewPane termSelectionViewPane) {
         if (termSelectionViewPane.getCredits() < termSelectionViewPane.getCreditLimit()) {
             model.addToSelectedModules(termSelectionViewPane.getUnSelectedModule());
             termSelectionViewPane.addToSelectedList(termSelectionViewPane.getUnSelectedModule());
@@ -204,32 +233,75 @@ public class OptionsModuleChooserController {
         }
     }
 
-    // EventHandlers used
+    // Event Handlers
+
+    /**
+     * Event handler class used to handle when the add button is pressed
+     * on each of the term views.
+     */
     public class AddHandler implements EventHandler {
+
+        // Fields
         TermSelectionViewPane termSelectionViewPane;
 
+        // Constructors
+
+        /**
+         * Passing a reference to the term selection view pane to handle the add button event.
+         *
+         * @param termSelectionViewPane reference to the term selection view pane
+         */
         public AddHandler(TermSelectionViewPane termSelectionViewPane) {
             this.termSelectionViewPane = termSelectionViewPane;
         }
 
+        // Methods
+
+        /**
+         * Adds the module to the selected list view and updates the credits in the process.
+         * Otherwise an alert is shown.
+         *
+         * @param event when the add button is pressed.
+         */
         @Override
         public void handle(Event event) {
             if (!model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
-                addModuleToListAndUpdateCredits(termSelectionViewPane);
+                addModulesToListAndUpdateCredits(termSelectionViewPane);
             } else {
                 alertDialogBuilder(AlertType.ERROR, "Duplicate Module", null, "Module has already been added");
             }
         }
     }
 
+    /**
+     * Event Handler class used to handle when the remove button is pressed
+     * on each of the term views.
+     */
     public class RemoveHandler implements EventHandler {
 
+        // Fields
         TermSelectionViewPane termSelectionViewPane;
 
+        // Constructors
+
+        /**
+         * Passing a reference to the term selection view pane to handle the add button event.
+         *
+         * @param termSelectionViewPane reference to the term selection view pane
+         */
         public RemoveHandler(TermSelectionViewPane termSelectionViewPane) {
             this.termSelectionViewPane = termSelectionViewPane;
         }
 
+        // Methods
+
+        /**
+         * Removes the module from the selected list view and updates the credits in the process.
+         * If the module is mandatory or nothing is selected upon remove button is pressed then an
+         * alert is shown accordingly.
+         *
+         * @param event when the remove button is pressed.
+         */
         @Override
         public void handle(Event event) {
             if (termSelectionViewPane.getSelectedItem() == null) {
@@ -237,10 +309,6 @@ public class OptionsModuleChooserController {
             } else if (termSelectionViewPane.getSelectedItem().isMandatory()) {
                 alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Cannot remove mandatory items");
             } else {
-                //termSelectionViewPane.decreaseCreditsBy(termSelectionViewPane.getCredits());
-                //int currentVal = termSelectionViewPane.getCredits();
-                //int newVal = currentVal - termSelectionViewPane.getSelectedItem().getCredits();
-                //termSelectionViewPane.setCredits(newVal);
                 termSelectionViewPane.decreaseCreditsBy(termSelectionViewPane.getCredits());
                 model.getAllSelectedModules().remove(termSelectionViewPane.getSelectedItem());
                 termSelectionViewPane.removeSelectedItem();
@@ -248,10 +316,22 @@ public class OptionsModuleChooserController {
         }
     }
 
+    /**
+     * Event Handler class used to handle when the Save Student button is pressed
+     * in the menu.
+     */
     public class SaveStudentHandler implements EventHandler {
+
+        /**
+         * Saves the students profile including their selected course and modules.
+         * If nothing is selected and the window is cancelled then a message is show in the console.
+         *
+         * @param event when the save student button is pressed.
+         * @throws IOException          in the event an error of saving the students profile.
+         * @throws NullPointerException in the event the dialog is cancelled, a message is outputted to the console.
+         */
         @Override
         public void handle(Event event) {
-
             File selectedFile = saveDialogBuilder("Save Profile", "DAT files (*.dat)", "dat");
 
             ObjectOutputStream oos;
@@ -260,15 +340,30 @@ public class OptionsModuleChooserController {
                 oos.writeObject(model);
                 oos.flush();
                 oos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (NullPointerException e) {
-                System.out.println("Dialog was cancelled");
+            } catch (IOException error) {
+                error.printStackTrace();
+                alertDialogBuilder(AlertType.ERROR, "Error", null, error.getMessage());
+            } catch (NullPointerException error) {
+                System.out.println("Dialog was cancelled. Nothing needs to be done.");
             }
         }
     }
 
+    /**
+     * Event handler class used to handle when loading student data when the button is pressed
+     * in the menu.
+     */
     public class LoadStudentHandler implements EventHandler {
+
+        /**
+         * Loads the students profile including their selected course and modules.
+         * Populates all the relevant fields of the students information including their selected course and modules.
+         *
+         * @param event when the load student button is pressed.
+         * @throws IOException            when there is an error with loading the students data, message in the console will appear.
+         * @throws ClassNotFoundException when its unable to load a class.
+         * @throws NullPointerException   when the dialog is cancelled then a message is shown in the console.
+         */
         @Override
         public void handle(Event event) {
             model.clearAllSelectedModules();
@@ -278,44 +373,44 @@ public class OptionsModuleChooserController {
 
             try {
                 ObjectInputStream ois = new ObjectInputStream(new FileInputStream(selectedFile));
-                StudentProfile s = (StudentProfile) ois.readObject();
+                StudentProfile loadedStudentProfile = (StudentProfile) ois.readObject();
 
-                model.setStudentName(s.getStudentName());
-                studentProfileViewPane.setTxtFirstName(s.getStudentName().getFirstName());
-                studentProfileViewPane.setTxtSurname(s.getStudentName().getFamilyName());
+                model.setStudentName(loadedStudentProfile.getStudentName());
+                studentProfileViewPane.setTxtFirstName(loadedStudentProfile.getStudentName().getFirstName());
+                studentProfileViewPane.setTxtSurname(loadedStudentProfile.getStudentName().getFamilyName());
 
-                model.setPnumber(s.getPnumber());
-                studentProfileViewPane.setTxtPNumber(s.getPnumber());
+                model.setPnumber(loadedStudentProfile.getPnumber());
+                studentProfileViewPane.setTxtPNumber(loadedStudentProfile.getPnumber());
 
-                model.setEmail(s.getEmail());
-                studentProfileViewPane.setTxtEmail(s.getEmail());
+                model.setEmail(loadedStudentProfile.getEmail());
+                studentProfileViewPane.setTxtEmail(loadedStudentProfile.getEmail());
 
-                model.setSubmissionDate(s.getSubmissionDate());
-                studentProfileViewPane.setDate(s.getSubmissionDate());
+                model.setSubmissionDate(loadedStudentProfile.getSubmissionDate());
+                studentProfileViewPane.setDate(loadedStudentProfile.getSubmissionDate());
 
-                model.setCourseOfStudy(s.getCourseOfStudy());
-                studentProfileViewPane.setSelectedCourse(s.getCourseOfStudy());
+                model.setCourseOfStudy(loadedStudentProfile.getCourseOfStudy());
+                studentProfileViewPane.setSelectedCourse(loadedStudentProfile.getCourseOfStudy());
 
-                List<Module> courseModules = new ArrayList<>(studentProfileViewPane.getSelectedCourse().getAllModulesOnCourse());
-                List<Module> savedStudentProfile = new ArrayList<>(s.getAllSelectedModules());
+                courseModules = new ArrayList<>(studentProfileViewPane.getSelectedCourse().getAllModulesOnCourse());
+                List<Module> savedStudentProfile = new ArrayList<>(loadedStudentProfile.getAllSelectedModules());
 
                 for (Module m : savedStudentProfile) {
                     if (m.getRunPlan() == Delivery.YEAR_LONG) {
-                        moduleSelectionViewPane.addYearLongModule(m);
                         model.addToSelectedModules(m);
+                        moduleSelectionViewPane.addYearLongModule(m);
                         term1SelectionPane.increaseCreditsBy(m.getCredits() / 2);
                         term2SelectionPane.increaseCreditsBy(m.getCredits() / 2);
                     }
 
                     if (m.getRunPlan() == Delivery.TERM_1) {
-                        term1SelectionPane.addToSelectedList(m);
                         model.addToSelectedModules(m);
+                        term1SelectionPane.addToSelectedList(m);
                         term1SelectionPane.increaseCreditsBy(m.getCredits());
                     }
 
                     if (m.getRunPlan() == Delivery.TERM_2) {
-                        term2SelectionPane.addToSelectedList(m);
                         model.addToSelectedModules(m);
+                        term2SelectionPane.addToSelectedList(m);
                         term2SelectionPane.increaseCreditsBy(m.getCredits());
                     }
                 }
@@ -329,19 +424,28 @@ public class OptionsModuleChooserController {
 
                 ois.close();
                 view.changeTab(1);
-                view.enableTab(view.getCreateCourseSelectionTab());
+                view.enableTab(view.getCourseSelectionTab());
                 optionsModuleChooserMenuBar.enableMenuItem(optionsModuleChooserMenuBar.getSaveItem());
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch (NullPointerException e) {
+            } catch (IOException | ClassNotFoundException error) {
+                error.printStackTrace();
+                alertDialogBuilder(AlertType.ERROR, "Error", null, error.getMessage());
+            } catch (NullPointerException error) {
                 System.out.println("Dialog was cancelled");
             }
         }
     }
 
+    /**
+     * Event handler class used to handle when reset button is pressed in the term views.
+     */
     public class ResetModulesHandler implements EventHandler {
+
+        /**
+         * When the reset button is pressed in the module selection view pane
+         * clears the model, view and populates the list views.
+         *
+         * @param event
+         */
         @Override
         public void handle(Event event) {
             model.getAllSelectedModules().clear();
@@ -350,8 +454,20 @@ public class OptionsModuleChooserController {
         }
     }
 
+    /**
+     * Event handler class used to handle when saving students overview of modules
+     * when the saveOverview button is pressed
+     */
     public class SaveOverviewHandler implements EventHandler {
 
+        /**
+         * Saves the students overview which includes their information and their selected course and modules.
+         * If nothing is selected and the window is cancelled then a message is show in the console.
+         *
+         * @param event when the sve overview button is pressed.
+         * @throws IOException          when there is an issue with saving the overview to a text file.
+         * @throws NullPointerException when the dialog is cancelled a message will appear in the console.
+         */
         @Override
         public void handle(Event event) {
             File selectedFile = saveDialogBuilder("Save Overview", "TXT files (*.txt)", "txt");
@@ -376,17 +492,28 @@ public class OptionsModuleChooserController {
                 }
 
                 printWriter.close();
-                alertDialogBuilder(AlertType.INFORMATION, "Data Saved", null, "Your course selected has been saved");
+                alertDialogBuilder(AlertType.INFORMATION, "Data Saved", null, "Your course and modules selections has been saved");
             } catch (IOException e) {
                 e.printStackTrace();
                 alertDialogBuilder(AlertType.ERROR, "Error", null, e.getMessage());
             } catch (NullPointerException e) {
-                System.out.println("Dialog was cancelled");
+                System.out.println("Dialog was cancelled. Nothing needs to be done.");
             }
         }
     }
 
+    /**
+     * Event handler class used to handle when submit button is pressed
+     * in the module selection view pane.
+     */
     public class SubmitModulesHandler implements EventHandler {
+
+        /**
+         * When the submit button is pressed in the module selection view pane
+         * the overview textarea gets populated with all the students information.
+         *
+         * @param event when the submit button is pressed.
+         */
         @Override
         public void handle(Event event) {
 
@@ -398,29 +525,44 @@ public class OptionsModuleChooserController {
             } else if (term2SelectionPane.getCredits() < term2SelectionPane.getCreditLimit()) {
                 alertDialogBuilder(AlertType.ERROR, "Not enough modules", null, "Please select more modules for Term 2");
             } else {
-                overviewViewPane.setResults("Name: " + model.getStudentName().getFullName() + "\n");
-                overviewViewPane.setResults("PNumber: " + model.getPnumber() + "\n");
-                overviewViewPane.setResults("Email: " + model.getEmail() + "\n");
-                overviewViewPane.setResults("Date: " + model.getSubmissionDate() + "\n");
-                overviewViewPane.setResults("Course: " + model.getCourseOfStudy() + "\n");
+                overviewViewPane.setOverviewResults("Name: " + model.getStudentName().getFullName());
+                overviewViewPane.setOverviewResults("PNumber: " + model.getPnumber());
+                overviewViewPane.setOverviewResults("Email: " + model.getEmail());
+                overviewViewPane.setOverviewResults("Date: " + model.getSubmissionDate());
+                overviewViewPane.setOverviewResults("Course: " + model.getCourseOfStudy());
 
-                overviewViewPane.setResults("\n" + "Selected modules:" + "\n");
-                overviewViewPane.setResults("==========" + "\n");
+                overviewViewPane.setOverviewResults("\n" + "Selected modules:");
+                overviewViewPane.setOverviewResults("==========");
 
-                List<Module> test = model.getAllSelectedModules().stream().sorted(Comparator.comparing(Module::getRunPlan)).collect(toList());
+                List<Module> modules = model.getAllSelectedModules().stream().sorted(Comparator.comparing(Module::getRunPlan)).collect(toList());
 
-                for (Module m : test) {
-                    overviewViewPane.setResults(m.toString() + "\n");
-                    overviewViewPane.setResults("credits: " + m.getCredits() + ", " + "Mandatory on your course? " + m.isMandatory() + ", " + "Delivery: " + m.getRunPlan() + "\n\n");
+                for (Module module : modules) {
+                    overviewViewPane.setOverviewResults("Module Code: " + module.getModuleCode() + "," + "Module name: " + module.getModuleName());
+                    overviewViewPane.setOverviewResults("credits: " + module.getCredits() + ", "
+                            + "Mandatory on your course? " + module.convertMandatoryToString(module.isMandatory()) + ", "
+                            + "Delivery: " + module.getRunPlan().toString() + "\n"
+                    );
                 }
 
                 view.changeTab(2);
-                view.enableTab(view.getCreateOverviewTab());
+                view.enableTab(view.getOverviewTab());
             }
         }
     }
 
+    /**
+     * Event handler class used to handle when creating the students profile button is pressed
+     * in the student profile view pane.
+     */
     public class StudentProfilesHandler implements EventHandler {
+
+        /**
+         * Creates the students profile with all the information entered and sets the model for later reference.
+         * Provided teh email they entered is valid.
+         * The list views are populated with the relevant modules from the selected course.
+         *
+         * @param event when the create student profile button is pressed.
+         */
         @Override
         public void handle(Event event) {
             model.getAllSelectedModules().clear();
@@ -428,17 +570,15 @@ public class OptionsModuleChooserController {
 
             // Email validation - check if the email is valid
             if (studentProfileViewPane.isEmailValid()) {
-
+                // Sets the information provided to the model.
                 model.setCourseOfStudy(studentProfileViewPane.getSelectedCourse());
                 model.setEmail(studentProfileViewPane.getTxtEmail());
                 model.setPnumber(studentProfileViewPane.getTxtPNumber());
                 model.setStudentName(new Name(studentProfileViewPane.getTxtFirstName(), studentProfileViewPane.getTxtSurname()));
                 model.setSubmissionDate(studentProfileViewPane.getDate());
-
                 populateTermModulesViews();
-
                 view.changeTab(1);
-                view.enableTab(view.getCreateCourseSelectionTab());
+                view.enableTab(view.getCourseSelectionTab());
                 optionsModuleChooserMenuBar.enableMenuItem(optionsModuleChooserMenuBar.getSaveItem());
             } else {
                 studentProfileViewPane.setInvalidEmailMessage("Enter a valid email address");
@@ -446,76 +586,159 @@ public class OptionsModuleChooserController {
         }
     }
 
+    /**
+     * Event handler class used to handle when load courses button is pressed
+     * in the menu.
+     */
     public class LoadCoursesHandler implements EventHandler {
 
+        /**
+         * Loads the courses by reading a text file and populates the combobox with all the courses.
+         * Each of the modules have their modules associated to it.
+         * If there is an error with loading the courses an error message is displayed.
+         *
+         * @param event when the add button is pressed.
+         * @throws IOException              in the event there is an issue with loading the file.
+         * @throws IllegalArgumentException in the event the file is not formatted correctly.
+         */
         @Override
         public void handle(Event event) {
-            //Scanner out;
-            //
-            //try {
-            //    out = new Scanner(new File("courses.txt"));
-            //    out.useDelimiter("[,\r\n]+");
-            //
-            //    while (out.hasNext()) {
-            //
-            //        Course course = new Course(out.next());
-            //        String courseCode = out.next();
-            //        String courseName = out.next();
-            //        int credits = Integer.parseInt(out.next());
-            //        boolean mandatory = Boolean.parseBoolean(out.next());
-            //        Delivery delivery = Delivery.valueOf(out.next().toUpperCase());
-            //
-            //        Module module = new Module(courseCode, courseName, credits, mandatory, delivery);
-            //        courses.put(course, module);
-            //
-            //    }
-            //    out.close();
-            //
-            //
-            //
-            //} catch (FileNotFoundException e) {
-            //    e.printStackTrace();
-            //}
+            studentProfileViewPane.clearCombox();
 
+            // Used Sets to prevent duplicate courses.
+            Set<Course> courses = new HashSet<>();
+            try {
+                Scanner scan = new Scanner(new File("courses2.txt"));
+                scan.useDelimiter("[,\r\n]+");
+                List<String> lines = new ArrayList<>();
+                Course course = null;
 
-        }
-    }
+                while(scan.hasNextLine()) lines.add(scan.nextLine());
 
-    public class DoubleMouseClickSelectionHandler implements EventHandler<MouseEvent> {
-
-        TermSelectionViewPane termSelectionViewPane;
-
-        public DoubleMouseClickSelectionHandler(TermSelectionViewPane termSelectionViewPane) {
-            this.termSelectionViewPane = termSelectionViewPane;
-        }
-
-        @Override
-        public void handle(MouseEvent event) {
-            if (event.getClickCount() == 2) {
-                if (model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
-                    alertDialogBuilder(AlertType.ERROR, "Duplicate Module", null, "Module already added");
-                } else {
-                    addModuleToListAndUpdateCredits(termSelectionViewPane);
+                for(String line : lines) {
+                    if(line.split(",").length == 1) {
+                        course = new Course(line);
+                    } else {
+                        String[] lineValues = line.split(",");
+                        Module module = new Module(null, null, 0, false, null);
+                        module.setModuleCode(lineValues[0]);
+                        module.setModuleName(lineValues[1]);
+                        module.setCredits(Integer.parseInt(lineValues[2]));
+                        module.setMandatory(module.convertMandatoryToBoolean(lineValues[3].toLowerCase()));
+                        module.setRunPlan(Delivery.convertFromString(lineValues[4]));
+                        if (course != null) {
+                            course.addModuleToCourse(module);
+                        }
+                        courses.add(course);
+                    }
                 }
+
+                studentProfileViewPane.populateComboBoxWithCourses(courses);
+            } catch (IOException error) {
+                error.printStackTrace();
+                alertDialogBuilder(AlertType.ERROR, "Error", null, error.getMessage());
+            } catch (IllegalArgumentException error) {
+                alertDialogBuilder(
+                        AlertType.ERROR,
+                        "Error Loading File",
+                        null,
+                        error.getMessage() + ". The value inserted was incorrect.");
             }
         }
     }
 
+    /**
+     * Mouse Event handler class used to handle when double clicks are made
+     * to the list views.
+     */
+    public class DoubleMouseClickSelectionHandler implements EventHandler<MouseEvent> {
+
+        // Fields
+        TermSelectionViewPane termSelectionViewPane;
+
+        // Constructors
+
+        /**
+         * Passing a reference to the term selection view pane to handle the add button event.
+         *
+         * @param termSelectionViewPane reference to the term selection view pane
+         */
+        public DoubleMouseClickSelectionHandler(TermSelectionViewPane termSelectionViewPane) {
+            this.termSelectionViewPane = termSelectionViewPane;
+        }
+
+        // Methods
+
+        /**
+         * When an item in the unselected list view is doubled clicked its added to the selected modules list view.
+         *
+         * @param event when item in unselected clicked 2x then its added to the selected modules list view.
+         */
+        @Override
+        public void handle(MouseEvent event) {
+            try {
+                if (event.getClickCount() == 2) {
+                    if (model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
+                        alertDialogBuilder(AlertType.ERROR, "Duplicate Module", null, "Module already added");
+                    } else {
+                        addModulesToListAndUpdateCredits(termSelectionViewPane);
+                    }
+                }
+            } catch (NullPointerException error) {
+                return;
+            }
+
+        }
+    }
+
+    // Change Listeners
+
+    /**
+     * Change Listener class used to handle when changes are made on the textfields so that only the max
+     * amount of characters are allowed on the textfield.
+     * Restricts the textfields by the specified max amount of characters.
+     */
     public class TextFieldLimitListener implements ChangeListener<String> {
 
+        // Fields
         private int maxLength;
 
+        // Constructors
         public TextFieldLimitListener(int maxLength) {
             this.maxLength = maxLength;
         }
 
+        // Methods
+
+        /**
+         * Listens on the amount of characters from the calling property to the specified max value.
+         * The property is casted to StringProperty as the implemented ChangeListener takes a String as the generic type.
+         * Reference from:
+         * https://docs.oracle.com/javase/8/javafx/api/javafx/beans/value/ChangeListener.html#changed-javafx.beans.value.ObservableValue-T-T-
+         * and assistance from Intellij IDE.
+         *
+         * @param property is the calling requested property that changed.
+         * @param oldValue is the old value.
+         * @param newValue is the new value.
+         */
         @Override
-        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-            if (newValue.length() > maxLength) ((StringProperty) observable).setValue(oldValue);
+        public void changed(ObservableValue<? extends String> property, String oldValue, String newValue) {
+            if (newValue.length() > maxLength) {
+                ((StringProperty) property).setValue(oldValue);
+            }
         }
     }
 
-    //helper method to build dialogs
+    // Builders
+
+    /**
+     * Creates an Alert Builder to create alerts dialogs
+     *
+     * @param type    of the alert dialog passed as a AlertType
+     * @param title   of the alert dialog passed as a String.
+     * @param header  of the alert dialog passed as a String.
+     * @param content of the alert dialog passed as a String.
+     */
     private void alertDialogBuilder(AlertType type, String title, String header, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -524,26 +747,39 @@ public class OptionsModuleChooserController {
         alert.showAndWait();
     }
 
+    /**
+     * Creates a Save Dialog to create a dialog to save files.
+     *
+     * @param title       of the open dialog passed as a String.
+     * @param description of the open dialog passed as a String.
+     * @param extension   of the save type used to restrict to passed as a string. e.g. dat or txt is all its required to pass.
+     * @return the save dialog with the file to save.
+     * @throws NullPointerException if the dialog is cancelled then a NullPointerException is thrown.
+     */
     public File saveDialogBuilder(String title, String description, String extension) throws NullPointerException {
         FileChooser fc = new FileChooser();
         fc.setTitle(title);
         fc.setInitialDirectory(new File(Paths.get("").toUri()));
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(description, "*." + extension.toLowerCase());
         fc.getExtensionFilters().add(extFilter);
-        File selectedFile = fc.showSaveDialog(null);
-
-        return selectedFile;
-
+        return fc.showSaveDialog(null);
     }
 
+    /**
+     * Creates a Open Dialog to create a dialog to open files.
+     *
+     * @param title       of the open dialog passed as a String.
+     * @param description of the open dialog passed as a String.
+     * @param extension   of the save type used to restrict to passed as a string. e.g. dat or txt is all its required to pass.
+     * @return the open dialog with the file to load.
+     * @throws NullPointerException if the dialog is cancelled then a NullPointerException is thrown.
+     */
     public File openDialogBuilder(String title, String description, String extension) throws NullPointerException {
         FileChooser fc = new FileChooser();
         fc.setTitle(title);
         fc.setInitialDirectory(new File(Paths.get("").toUri()));
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(description, "*." + extension);
         fc.getExtensionFilters().add(extFilter);
-        File selectedFile = fc.showOpenDialog(null);
-
-        return selectedFile;
+        return fc.showOpenDialog(null);
     }
 }

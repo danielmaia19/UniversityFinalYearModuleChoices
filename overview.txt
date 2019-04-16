@@ -1,0 +1,30 @@
+Full Name: sfsfsdf sdfsdf
+PNumber: fsfsdfsdf
+Email: sfsf@gmail.com
+Submission Date: 2019-04-19
+Course: Computer Science
+
+Selected Modules:
+==========
+
+CTEC3410 : Web Application Penetration Testing
+credits: 15, Mandatory on your course? false, Delivery: term 2
+
+CTEC3605 : Multi-service Networks 1
+credits: 15, Mandatory on your course? false, Delivery: term 1
+
+CTEC3606 : Multi-service Networks 2
+credits: 15, Mandatory on your course? false, Delivery: term 2
+
+CTEC3905 : Front-End Web Development
+credits: 15, Mandatory on your course? false, Delivery: term 2
+
+IMAT3406 : Fuzzy Logic and Knowledge Based Systems
+credits: 15, Mandatory on your course? false, Delivery: term 1
+
+IMAT3423 : Systems Building: Methods
+credits: 15, Mandatory on your course? true, Delivery: term 1
+
+IMAT3451 : Computing Project
+credits: 30, Mandatory on your course? true, Delivery: year long
+

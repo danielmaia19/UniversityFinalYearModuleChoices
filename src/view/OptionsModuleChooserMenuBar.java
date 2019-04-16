@@ -8,11 +8,27 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.control.SeparatorMenuItem;
 
+/**
+ * Creates the menu bar with the necessary menus and menu items.
+ * There are 2 menus of File and About.
+ * File menu contains a sub-menu of load containing, loading Student Data and Courses.
+ * File also contains saving Student Data and a exit to quit the application.
+ *
+ * @author P1718603X
+ */
 public class OptionsModuleChooserMenuBar extends MenuBar {
 
-    //declared for access throughout class, as handlers are now attached via methods - see towards end of class
+    // Fields
     private MenuItem loadItem, saveItem, exitItem, aboutItem, loadCourseItem;
 
+    // Constructors
+
+    /**
+     * Default Constructor: Creates the menu bar with the menus and their menu items.
+     * There are 2 menus of File and About.
+     * File menu contains a sub-menu of Load containing, loading Student Data and Courses.
+     * File also contains saving Student Data and a Exit to quit the application.
+     */
     public OptionsModuleChooserMenuBar() {
 
         Menu menu, loadMenu;
@@ -51,31 +67,69 @@ public class OptionsModuleChooserMenuBar extends MenuBar {
         this.getMenus().addAll(menu);
     }
 
+    // Methods
+
+    /**
+     * Returns the save menu item.
+     *
+     * @return the save menu item from the menu.
+     */
     public MenuItem getSaveItem() {
         return saveItem;
     }
 
+    /**
+     * Enables the menu item to allow interactivity.
+     *
+     * @param item is the menu item passed to enable it.
+     */
     public void enableMenuItem(MenuItem item) {
         item.setDisable(false);
     }
 
-    //these methods allow handlers to be externally attached to this view and used by the controller
+    // Event Handlers
+
+    /**
+     * Sets a set on action click event on the exit menu item on the menu bar button.
+     *
+     * @param handler is passed as a EventHandler of ActionEvent to perform a task on menu item click.
+     */
     public void addExitHandler(EventHandler<ActionEvent> handler) {
         exitItem.setOnAction(handler);
     }
 
+    /**
+     * Sets a set on action click event on the about menu item on the menu bar button.
+     *
+     * @param handler is passed as a EventHandler of ActionEvent to perform a task on menu item click.
+     */
     public void addAboutHandler(EventHandler<ActionEvent> handler) {
         aboutItem.setOnAction(handler);
     }
 
+    /**
+     * Sets a set on action click event on the load student data menu item on the menu bar button.
+     *
+     * @param handler is passed as a EventHandler of ActionEvent to perform a task on menu item click.
+     */
     public void addLoadStudentDataHandler(EventHandler<ActionEvent> handler) {
         loadItem.setOnAction(handler);
     }
 
+    /**
+     * Sets a set on action click event on the save student data menu item on the menu bar button.
+     *
+     * @param handler is passed as a EventHandler of ActionEvent to perform a task on menu item click.
+     */
     public void addSaveStudentDataHandler(EventHandler<ActionEvent> handler) {
         saveItem.setOnAction(handler);
     }
 
+    /**
+     * Sets a set on action click event on the load course data menu item on the menu bar button.
+     *
+     * @param handler is passed as a EventHandler of ActionEvent to perform a task on menu item click.
+     */
     public void addLoadCourseDataHandler(EventHandler<ActionEvent> handler) {
         loadCourseItem.setOnAction(handler);
     }

@@ -26,6 +26,7 @@ public class ModuleSelectionViewPane extends VBox {
     private TermSelectionViewPane term1SectionViewPane, term2SelectionViewPane;
 
     // Constructors
+
     /**
      * Default Constructor:
      * Creates the Module Selection View Pane.
@@ -67,6 +68,7 @@ public class ModuleSelectionViewPane extends VBox {
     }
 
     // Methods
+
     /**
      * Resets the year long, term1 and term2 lists.
      */
@@ -78,6 +80,7 @@ public class ModuleSelectionViewPane extends VBox {
 
     /**
      * Returns the Term1 Selection View Pane.
+     *
      * @return the Term1 Selection View Pane.
      */
     public TermSelectionViewPane getTerm1SectionViewPane() {
@@ -86,6 +89,7 @@ public class ModuleSelectionViewPane extends VBox {
 
     /**
      * Returns the Term2 Selection View Pane.
+     *
      * @return the Term Selection View Pane.
      */
     public TermSelectionViewPane getTerm2SelectionViewPane() {
@@ -94,6 +98,7 @@ public class ModuleSelectionViewPane extends VBox {
 
     /**
      * Adds the year long module to the year long list view.
+     *
      * @param module used to be added to the year long list view.
      */
     public void addYearLongModule(Module module) {
@@ -101,8 +106,10 @@ public class ModuleSelectionViewPane extends VBox {
     }
 
     // Event handlers
+
     /**
      * Sets a set on action click event on the submit button.
+     *
      * @param handler is passed as a EventHandler of ActionEvent to perform a task on button click.
      */
     public void addSubmitModulesHandler(EventHandler<ActionEvent> handler) {
@@ -111,6 +118,7 @@ public class ModuleSelectionViewPane extends VBox {
 
     /**
      * Sets a set on action click event on the reset button.
+     *
      * @param handler is passed as a EventHandler of ActionEvent to perform a task on button click.
      */
     public void addResetModulesHandler(EventHandler<ActionEvent> handler) {

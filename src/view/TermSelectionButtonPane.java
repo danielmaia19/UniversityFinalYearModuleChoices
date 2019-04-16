@@ -8,6 +8,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.control.TextField;
 
 /**
+ * This class represents a button pane to be used with any Term.
+ * The button pane consists of credits label, credits textfield and
+ * 2 buttons of add and remove to modules from the list.
  *
  * @author P1718603X
  */
@@ -20,8 +23,11 @@ public class TermSelectionButtonPane extends HBox {
     private Button addBtn, removeBtn;
 
     // Constructors
+
     /**
-     *
+     * Default Constructor:
+     * The button pane consists of credits label, credits textfield and
+     * 2 buttons of add and remove to modules from the list.
      */
     public TermSelectionButtonPane() {
 
@@ -41,27 +47,58 @@ public class TermSelectionButtonPane extends HBox {
     }
 
     // Methods
+
+    /**
+     * Returns the add button.
+     *
+     * @return the add button.
+     */
     public Button getAddBtn() {
         return addBtn;
     }
 
+    /**
+     * Returns the remove button.
+     *
+     * @return the remove button.
+     */
     public Button getRemoveBtn() {
         return removeBtn;
     }
 
+    /**
+     * Returns the credit limit value.
+     *
+     * @return the credit limit value.
+     */
     public int getCreditLimit() {
         return creditLimit;
     }
 
+    /**
+     * Returns the credits value.
+     *
+     * @return the credits value.
+     */
     public int getCredits() {
         return Integer.parseInt(credits.getText());
     }
 
+    /**
+     * Sets the credits value.
+     *
+     * @param value is the number to set the credits value.
+     */
     public void setCredits(int value) {
         credits.setText(String.valueOf(value));
     }
 
-    public void setCreditLimit(int creditLimit) {
-        this.creditLimit = creditLimit;
+    /**
+     * Sets the credit limit on the term.
+     *
+     * @param max is the limit set on the term.
+     */
+    public void setCreditLimit(int max) {
+        creditLimit = max;
     }
 }
