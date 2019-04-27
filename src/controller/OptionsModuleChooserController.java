@@ -164,9 +164,8 @@ public class OptionsModuleChooserController {
         List<String> lines = new ArrayList<>();
         Course course = null;
 
-        try {
-            File selectedFile = openDialogBuilder("Open Courses", "Open all the courses", "txt");
-            Scanner scan = new Scanner(selectedFile);
+        File selectedFile = openDialogBuilder("Open Courses", "Open courses to display", "txt");
+        try(Scanner scan = new Scanner(selectedFile)) {
 
             while (scan.hasNextLine()) lines.add(scan.nextLine());
 
