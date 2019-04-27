@@ -102,8 +102,8 @@ public class OptionsModuleChooserController {
         term2SelectionPane.addRemoveHandler(new RemoveHandler(term2SelectionPane));
 
         // Select items with double clicks
-        term1SelectionPane.addDoubleMouseClickSelectionHandler(new DoubleMouseClickSelectionHandler(term1SelectionPane));
-        term2SelectionPane.addDoubleMouseClickSelectionHandler(new DoubleMouseClickSelectionHandler(term2SelectionPane));
+        term1SelectionPane.addDoubleMouseAddClickSelectionHandler(new DoubleMouseClickSelectionHandler(term1SelectionPane));
+        term2SelectionPane.addDoubleMouseRemoveClickSelectionHandler(new DoubleMouseClickSelectionHandler(term2SelectionPane));
 
         overviewViewPane.addSaveOverviewHandler(new SaveOverviewHandler());
 
