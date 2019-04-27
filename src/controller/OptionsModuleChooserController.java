@@ -4,9 +4,9 @@ import view.*;
 import model.*;
 import java.io.*;
 import java.util.*;
-import javafx.event.Event;
 import java.nio.file.Paths;
 import javafx.stage.FileChooser;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.*;
@@ -216,7 +216,7 @@ public class OptionsModuleChooserController {
      * Event handler class used to handle when the add button is pressed
      * on each of the term views.
      */
-    public class AddHandler implements EventHandler {
+    public class AddHandler implements EventHandler<ActionEvent> {
 
         // Fields
         TermSelectionViewPane termSelectionViewPane;
@@ -241,7 +241,7 @@ public class OptionsModuleChooserController {
          * @param event when the add button is pressed.
          */
         @Override
-        public void handle(Event event) {
+        public void handle(ActionEvent event) {
             if (!model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
                 addModulesToListAndUpdateCredits(termSelectionViewPane);
             } else {
@@ -254,7 +254,7 @@ public class OptionsModuleChooserController {
      * Event Handler class used to handle when the remove button is pressed
      * on each of the term views.
      */
-    public class RemoveHandler implements EventHandler {
+    public class RemoveHandler implements EventHandler<ActionEvent> {
 
         // Fields
         TermSelectionViewPane termSelectionViewPane;
@@ -280,7 +280,7 @@ public class OptionsModuleChooserController {
          * @param event when the remove button is pressed.
          */
         @Override
-        public void handle(Event event) {
+        public void handle(ActionEvent event) {
             if (termSelectionViewPane.getSelectedItem() == null) {
                 alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Please select an item to remove.");
             } else if (termSelectionViewPane.getSelectedItem().isMandatory()) {
@@ -297,7 +297,7 @@ public class OptionsModuleChooserController {
      * Event Handler class used to handle when the Save Student button is pressed
      * in the menu.
      */
-    public class SaveStudentHandler implements EventHandler {
+    public class SaveStudentHandler implements EventHandler<ActionEvent> {
 
         /**
          * Saves the students profile including their selected course and modules.
@@ -308,7 +308,7 @@ public class OptionsModuleChooserController {
          * @throws NullPointerException in the event the dialog is cancelled, a message is outputted to the console.
          */
         @Override
-        public void handle(Event event) {
+        public void handle(ActionEvent event) {
             File selectedFile = saveDialogBuilder("Save Profile", "DAT files (*.dat)", "dat");
 
             ObjectOutputStream oos;
@@ -330,7 +330,7 @@ public class OptionsModuleChooserController {
      * Event handler class used to handle when loading student data when the button is pressed
      * in the menu.
      */
-    public class LoadStudentHandler implements EventHandler {
+    public class LoadStudentHandler implements EventHandler<ActionEvent> {
 
         /**
          * Loads the students profile including their selected course and modules.
@@ -342,7 +342,7 @@ public class OptionsModuleChooserController {
          * @throws NullPointerException   when the dialog is cancelled then a message is shown in the console.
          */
         @Override
-        public void handle(Event event) {
+        public void handle(ActionEvent event) {
             model.clearAllSelectedModules();
             view.getModuleSelectionViewPane().resetAll();
 
@@ -415,7 +415,7 @@ public class OptionsModuleChooserController {
     /**
      * Event handler class used to handle when reset button is pressed in the term views.
      */
-    public class ResetModulesHandler implements EventHandler {
+    public class ResetModulesHandler implements EventHandler<ActionEvent> {
 
         /**
          * When the reset button is pressed in the module selection view pane
@@ -424,7 +424,7 @@ public class OptionsModuleChooserController {
          * @param event
          */
         @Override
-        public void handle(Event event) {
+        public void handle(ActionEvent event) {
             model.getAllSelectedModules().clear();
             view.getModuleSelectionViewPane().resetAll();
             populateTermModulesViews();
@@ -435,7 +435,7 @@ public class OptionsModuleChooserController {
      * Event handler class used to handle when saving students overview of modules
      * when the saveOverview button is pressed
      */
-    public class SaveOverviewHandler implements EventHandler {
+    public class SaveOverviewHandler implements EventHandler<ActionEvent> {
 
         /**
          * Saves the students overview which includes their information and their selected course and modules.
@@ -446,7 +446,7 @@ public class OptionsModuleChooserController {
          * @throws NullPointerException when the dialog is cancelled a message will appear in the console.
          */
         @Override
-        public void handle(Event event) {
+        public void handle(ActionEvent event) {
             File selectedFile = saveDialogBuilder("Save Overview", "TXT files (*.txt)", "txt");
 
             FileWriter fileWriter;
@@ -483,7 +483,7 @@ public class OptionsModuleChooserController {
      * Event handler class used to handle when submit button is pressed
      * in the module selection view pane.
      */
-    public class SubmitModulesHandler implements EventHandler {
+    public class SubmitModulesHandler implements EventHandler<ActionEvent> {
 
         /**
          * When the submit button is pressed in the module selection view pane
@@ -492,7 +492,7 @@ public class OptionsModuleChooserController {
          * @param event when the submit button is pressed.
          */
         @Override
-        public void handle(Event event) {
+        public void handle(ActionEvent event) {
 
             //model.clearAllSelectedModules();
             overviewViewPane.clearResults();
@@ -531,7 +531,7 @@ public class OptionsModuleChooserController {
      * Event handler class used to handle when creating the students profile button is pressed
      * in the student profile view pane.
      */
-    public class StudentProfilesHandler implements EventHandler {
+    public class StudentProfilesHandler implements EventHandler<ActionEvent> {
 
         /**
          * Creates the students profile with all the information entered and sets the model for later reference.
@@ -541,7 +541,7 @@ public class OptionsModuleChooserController {
          * @param event when the create student profile button is pressed.
          */
         @Override
-        public void handle(Event event) {
+        public void handle(ActionEvent event) {
             model.getAllSelectedModules().clear();
             view.getModuleSelectionViewPane().resetAll();
             setupAndRetrieveCourses();
@@ -568,7 +568,7 @@ public class OptionsModuleChooserController {
      * Event handler class used to handle when load courses button is pressed
      * in the menu.
      */
-    public class LoadCoursesHandler implements EventHandler {
+    public class LoadCoursesHandler implements EventHandler<ActionEvent> {
 
         /**
          * Loads the courses by reading a text file and populates the combobox with all the courses.
@@ -580,7 +580,7 @@ public class OptionsModuleChooserController {
          * @throws IllegalArgumentException in the event the file is not formatted correctly.
          */
         @Override
-        public void handle(Event event) {
+        public void handle(ActionEvent event) {
             studentProfileViewPane.clearCombox();
             try {
                 studentProfileViewPane.populateComboBoxWithCourses(setupAndRetrieveCourses());

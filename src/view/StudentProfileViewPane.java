@@ -1,13 +1,9 @@
 package view;
 
 import model.Course;
-
 import java.util.Set;
-
 import javafx.geometry.Pos;
-
 import java.time.LocalDate;
-
 import javafx.util.Callback;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
