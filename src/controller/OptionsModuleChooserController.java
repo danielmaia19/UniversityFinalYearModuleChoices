@@ -244,15 +244,13 @@ public class OptionsModuleChooserController {
         @Override
         public void handle(ActionEvent event) {
             try {
-                if (termSelectionViewPane.getSelectedItem() == null) {
-                    alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Please select an item to remove.");
-                } else if (!model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
-                    addModulesToListAndUpdateCredits(termSelectionViewPane);
-                } else {
+                if (model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
                     alertDialogBuilder(AlertType.ERROR, "Duplicate Module", null, "Module has already been added");
+                } else {
+                    addModulesToListAndUpdateCredits(termSelectionViewPane);
                 }
             } catch(NullPointerException e) {
-                return;
+                alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Please select an item to add.");
             }
 
         }
@@ -289,14 +287,16 @@ public class OptionsModuleChooserController {
          */
         @Override
         public void handle(ActionEvent event) {
-            if (termSelectionViewPane.getSelectedItem() == null) {
+            try {
+                if (termSelectionViewPane.getSelectedItem().isMandatory()) {
+                    alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Cannot remove mandatory items");
+                } else {
+                    termSelectionViewPane.decreaseCreditsBy(termSelectionViewPane.getCredits());
+                    model.getAllSelectedModules().remove(termSelectionViewPane.getSelectedItem());
+                    termSelectionViewPane.removeSelectedItem();
+                }
+            } catch(NullPointerException e) {
                 alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Please select an item to remove.");
-            } else if (termSelectionViewPane.getSelectedItem().isMandatory()) {
-                alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Cannot remove mandatory items");
-            } else {
-                termSelectionViewPane.decreaseCreditsBy(termSelectionViewPane.getCredits());
-                model.getAllSelectedModules().remove(termSelectionViewPane.getSelectedItem());
-                termSelectionViewPane.removeSelectedItem();
             }
         }
     }
@@ -325,7 +325,7 @@ public class OptionsModuleChooserController {
                 oos.writeObject(model);
                 oos.flush();
                 oos.close();
-                alertDialogBuilder(AlertType.INFORMATION, "Profile Data Saved", null, "Your profile has saved successfully");
+                alertDialogBuilder(AlertType.INFORMATION, "Profile Data Successfully Saved", null, "Your profile has been saved successfully");
             } catch (IOException error) {
                 error.printStackTrace();
                 alertDialogBuilder(AlertType.ERROR, "Error", null, error.getMessage());
