@@ -19,6 +19,7 @@ public class StudentProfile implements Serializable {
     private Name studentName;
     private String pNumber, email;
     private Set<Module> selectedModules;
+    private static final long serialVersionUID = 1L;
 
     // Constructor
 

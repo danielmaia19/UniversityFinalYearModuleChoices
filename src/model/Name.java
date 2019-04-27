@@ -12,6 +12,7 @@ public class Name implements Serializable {
 
     // Fields
     private String firstName, familyName;
+    private static final long serialVersionUID = 1L;
 
     // Constructors
 

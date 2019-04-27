@@ -17,6 +17,7 @@ public class Module implements Comparable<Module>, Serializable {
     private Delivery runPlan;
     private boolean mandatory;
     private String moduleCode, moduleName;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Creates a Module by setting the module code, module name, credits, mandatory, and run plan when
