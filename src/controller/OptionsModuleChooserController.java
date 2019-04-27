@@ -43,7 +43,6 @@ public class OptionsModuleChooserController {
      * @param model is passed to create the model of the Student Profile.
      */
     public OptionsModuleChooserController(OptionsModuleChooserRootPane view, StudentProfile model) {
-
         //initialise model and view fields
         this.model = model;
         this.view = view;
@@ -102,12 +101,12 @@ public class OptionsModuleChooserController {
         term2SelectionPane.addRemoveHandler(new RemoveHandler(term2SelectionPane));
 
         // Term 1 - Select and Remove items with double clicks
-        term1SelectionPane.addDoubleMouseAddClickSelectionHandler(new DoubleMouseClickSelectionHandler(term1SelectionPane));
-        term1SelectionPane.addDoubleMouseRemoveClickSelectionHandler(new DoubleMouseClickSelectionHandler(term1SelectionPane));
+        term1SelectionPane.addDoubleMouseAddClickSelectionHandler(new DoubleMouseAddClickSelectionHandler(term1SelectionPane));
+        term1SelectionPane.addDoubleMouseRemoveClickSelectionHandler(new DoubleMouseRemoveClickSelectionHandler(term1SelectionPane));
 
         // Term 2 - Select and Remove items with double clicks
-        term2SelectionPane.addDoubleMouseAddClickSelectionHandler(new DoubleMouseClickSelectionHandler(term2SelectionPane));
-        term2SelectionPane.addDoubleMouseRemoveClickSelectionHandler(new DoubleMouseClickSelectionHandler(term2SelectionPane));
+        term2SelectionPane.addDoubleMouseAddClickSelectionHandler(new DoubleMouseAddClickSelectionHandler(term2SelectionPane));
+        term2SelectionPane.addDoubleMouseRemoveClickSelectionHandler(new DoubleMouseRemoveClickSelectionHandler(term2SelectionPane));
 
         overviewViewPane.addSaveOverviewHandler(new SaveOverviewHandler());
 
@@ -244,11 +243,18 @@ public class OptionsModuleChooserController {
          */
         @Override
         public void handle(ActionEvent event) {
-            if (!model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
-                addModulesToListAndUpdateCredits(termSelectionViewPane);
-            } else {
-                alertDialogBuilder(AlertType.ERROR, "Duplicate Module", null, "Module has already been added");
+            try {
+                if (termSelectionViewPane.getSelectedItem() == null) {
+                    alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Please select an item to remove.");
+                } else if (!model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
+                    addModulesToListAndUpdateCredits(termSelectionViewPane);
+                } else {
+                    alertDialogBuilder(AlertType.ERROR, "Duplicate Module", null, "Module has already been added");
+                }
+            } catch(NullPointerException e) {
+                return;
             }
+
         }
     }
 
@@ -319,6 +325,7 @@ public class OptionsModuleChooserController {
                 oos.writeObject(model);
                 oos.flush();
                 oos.close();
+                alertDialogBuilder(AlertType.INFORMATION, "Profile Data Saved", null, "Your profile has saved successfully");
             } catch (IOException error) {
                 error.printStackTrace();
                 alertDialogBuilder(AlertType.ERROR, "Error", null, error.getMessage());
@@ -350,8 +357,8 @@ public class OptionsModuleChooserController {
 
             File selectedFile = openDialogBuilder("Load Profile", "DAT files (*.dat)", "dat");
 
-            try {
-                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(selectedFile));
+            try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(selectedFile))) {
+
                 StudentProfile loadedStudentProfile = (StudentProfile) ois.readObject();
 
                 model.setStudentName(loadedStudentProfile.getStudentName());
@@ -401,7 +408,6 @@ public class OptionsModuleChooserController {
                     }
                 }
 
-                ois.close();
                 view.changeTab(1);
                 view.enableTab(view.getCourseSelectionTab());
                 optionsModuleChooserMenuBar.enableMenuItem(optionsModuleChooserMenuBar.getSaveItem());
@@ -420,8 +426,8 @@ public class OptionsModuleChooserController {
     public class ResetModulesHandler implements EventHandler<ActionEvent> {
 
         /**
-         * When the reset button is pressed in the module selection view pane
-         * clears the model, view and populates the list views.
+         * When the reset button is pressed in the module selection view pane it
+         * clears the model, view and re-populates the list views.
          *
          * @param event
          */
@@ -451,9 +457,8 @@ public class OptionsModuleChooserController {
         public void handle(ActionEvent event) {
             File selectedFile = saveDialogBuilder("Save Overview", "TXT files (*.txt)", "txt");
 
-            FileWriter fileWriter;
-            try {
-                fileWriter = new FileWriter(selectedFile);
+            try(FileWriter fileWriter = new FileWriter(selectedFile)) {
+                ;
                 PrintWriter printWriter = new PrintWriter(fileWriter);
 
                 printWriter.println("Full Name: " + model.getStudentName().getFirstName() + " " + model.getStudentName().getFamilyName());
@@ -470,8 +475,7 @@ public class OptionsModuleChooserController {
                     printWriter.println("credits: " + m.getCredits() + ", " + "Mandatory on your course? " + m.isMandatory() + ", " + "Delivery: " + m.getRunPlan() + "\n");
                 }
 
-                printWriter.close();
-                alertDialogBuilder(AlertType.INFORMATION, "Data Saved", null, "Your course and modules selections has been saved");
+                alertDialogBuilder(AlertType.INFORMATION, "Module Selections Saved", null, "Your course and modules selections has been saved");
             } catch (IOException e) {
                 e.printStackTrace();
                 alertDialogBuilder(AlertType.ERROR, "Error", null, e.getMessage());
@@ -591,7 +595,7 @@ public class OptionsModuleChooserController {
                         AlertType.ERROR,
                         "Error Loading File",
                         null,
-                        error.getMessage() + ". The value inserted was incorrect.");
+                        error.getMessage() + ". The value inserted is incorrect.");
             }
         }
     }
@@ -600,7 +604,7 @@ public class OptionsModuleChooserController {
      * Mouse Event handler class used to handle when double clicks are made
      * to the list views.
      */
-    public class DoubleMouseClickSelectionHandler implements EventHandler<MouseEvent> {
+    public class DoubleMouseAddClickSelectionHandler implements EventHandler<MouseEvent> {
 
         // Fields
         TermSelectionViewPane termSelectionViewPane;
@@ -612,7 +616,7 @@ public class OptionsModuleChooserController {
          *
          * @param termSelectionViewPane reference to the term selection view pane
          */
-        public DoubleMouseClickSelectionHandler(TermSelectionViewPane termSelectionViewPane) {
+        public DoubleMouseAddClickSelectionHandler(TermSelectionViewPane termSelectionViewPane) {
             this.termSelectionViewPane = termSelectionViewPane;
         }
 
@@ -627,10 +631,61 @@ public class OptionsModuleChooserController {
         public void handle(MouseEvent event) {
             try {
                 if (event.getClickCount() == 2) {
+                    if (termSelectionViewPane.getSelectedItem() == null) {
+                        alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Please select an item to remove.");
+                    }
                     if (model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
                         alertDialogBuilder(AlertType.ERROR, "Duplicate Module", null, "Module already added");
                     } else {
                         addModulesToListAndUpdateCredits(termSelectionViewPane);
+                    }
+                }
+            } catch (NullPointerException error) {
+                return;
+            }
+
+        }
+    }
+
+    /**
+     * Mouse Event handler class used to handle when double clicks are made
+     * to the list views.
+     */
+    public class DoubleMouseRemoveClickSelectionHandler implements EventHandler<MouseEvent> {
+
+        // Fields
+        TermSelectionViewPane termSelectionViewPane;
+
+        // Constructors
+
+        /**
+         * Passing a reference to the term selection view pane to handle the add button event.
+         *
+         * @param termSelectionViewPane reference to the term selection view pane
+         */
+        public DoubleMouseRemoveClickSelectionHandler(TermSelectionViewPane termSelectionViewPane) {
+            this.termSelectionViewPane = termSelectionViewPane;
+        }
+
+        // Methods
+
+        /**
+         * When an item in the unselected list view is doubled clicked its added to the selected modules list view.
+         *
+         * @param event when item in unselected clicked 2x then its added to the selected modules list view.
+         */
+        @Override
+        public void handle(MouseEvent event) {
+            try {
+                if (event.getClickCount() == 2) {
+                    if (termSelectionViewPane.getSelectedItem() == null) {
+                        alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Please select an item to remove.");
+                    } else if (termSelectionViewPane.getSelectedItem().isMandatory()) {
+                        alertDialogBuilder(Alert.AlertType.ERROR, "Error", null, "Cannot remove mandatory items");
+                    } else {
+                        termSelectionViewPane.decreaseCreditsBy(termSelectionViewPane.getCredits());
+                        model.getAllSelectedModules().remove(termSelectionViewPane.getSelectedItem());
+                        termSelectionViewPane.removeSelectedItem();
                     }
                 }
             } catch (NullPointerException error) {
