@@ -53,9 +53,8 @@ public class OptionsModuleChooserController {
         overviewViewPane = view.getOverviewViewPane();
         term1SelectionPane = view.getModuleSelectionViewPane().getTerm1SectionViewPane();
         term2SelectionPane = view.getModuleSelectionViewPane().getTerm2SelectionViewPane();
-
-        //populate combobox in create profile pane, e.g. if profilePane represented your create profile pane you could invoke the line below
-        //studentProfileViewPane.populateComboBoxWithCourses(setupAndRetrieveCourses());
+        
+        studentProfileViewPane.populateComboBoxWithCourses(setupAndRetrieveCourses());
 
         // Attach Event Handlers
         this.attachEventHandlers();
@@ -164,8 +163,7 @@ public class OptionsModuleChooserController {
         List<String> lines = new ArrayList<>();
         Course course = null;
 
-        File selectedFile = openDialogBuilder("Open Courses", "Open courses to display", "txt");
-        try(Scanner scan = new Scanner(selectedFile)) {
+        try(Scanner scan = new Scanner(new File("courses.txt"))) {
 
             while (scan.hasNextLine()) lines.add(scan.nextLine());
 
