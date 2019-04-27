@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="OptionsModuleChooser:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/OptionsModuleChooser_jar</output-path>
+    <root id="archive" name="OptionsModuleChooser.jar">
+      <element id="module-output" name="OptionsModuleChooser" />
+    </root>
+  </artifact>
+</component>
