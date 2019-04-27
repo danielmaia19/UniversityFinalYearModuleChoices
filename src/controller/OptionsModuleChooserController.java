@@ -1,6 +1,5 @@
 package controller;
 
-import com.sun.org.apache.bcel.internal.generic.Select;
 import view.*;
 import model.*;
 import java.io.*;
@@ -44,6 +43,7 @@ public class OptionsModuleChooserController {
      * @param model is passed to create the model of the Student Profile.
      */
     public OptionsModuleChooserController(OptionsModuleChooserRootPane view, StudentProfile model) {
+
         //initialise model and view fields
         this.model = model;
         this.view = view;
@@ -163,8 +163,8 @@ public class OptionsModuleChooserController {
      */
     private Set<Course> setupAndRetrieveCourses() {
 
-        // Used Sets to prevent duplicate courses.
-        Set<Course> courses = new HashSet<>();
+        // Used Sets to prevent duplicate courses and TreeSet for ordering.
+        Set<Course> courses = new TreeSet<>();
         List<String> lines = new ArrayList<>();
         Course course = null;
 
