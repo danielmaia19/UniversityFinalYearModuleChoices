@@ -1,5 +1,6 @@
 package controller;
 
+import com.sun.org.apache.bcel.internal.generic.Select;
 import view.*;
 import model.*;
 import java.io.*;
@@ -53,7 +54,7 @@ public class OptionsModuleChooserController {
         overviewViewPane = view.getOverviewViewPane();
         term1SelectionPane = view.getModuleSelectionViewPane().getTerm1SectionViewPane();
         term2SelectionPane = view.getModuleSelectionViewPane().getTerm2SelectionViewPane();
-        
+
         studentProfileViewPane.populateComboBoxWithCourses(setupAndRetrieveCourses());
 
         // Attach Event Handlers
@@ -100,8 +101,12 @@ public class OptionsModuleChooserController {
         term2SelectionPane.addAddHandler(new AddHandler(term2SelectionPane));
         term2SelectionPane.addRemoveHandler(new RemoveHandler(term2SelectionPane));
 
-        // Select items with double clicks
+        // Term 1 - Select and Remove items with double clicks
         term1SelectionPane.addDoubleMouseAddClickSelectionHandler(new DoubleMouseClickSelectionHandler(term1SelectionPane));
+        term1SelectionPane.addDoubleMouseRemoveClickSelectionHandler(new DoubleMouseClickSelectionHandler(term1SelectionPane));
+
+        // Term 2 - Select and Remove items with double clicks
+        term2SelectionPane.addDoubleMouseAddClickSelectionHandler(new DoubleMouseClickSelectionHandler(term2SelectionPane));
         term2SelectionPane.addDoubleMouseRemoveClickSelectionHandler(new DoubleMouseClickSelectionHandler(term2SelectionPane));
 
         overviewViewPane.addSaveOverviewHandler(new SaveOverviewHandler());
