@@ -35,7 +35,6 @@ public class OptionsModuleChooserController {
     private TermSelectionViewPane term1SelectionPane, term2SelectionPane;
 
     // Constructors
-
     /**
      * The constructor is used to pass the view and controller in the main application class.
      *
@@ -54,6 +53,7 @@ public class OptionsModuleChooserController {
         term1SelectionPane = view.getModuleSelectionViewPane().getTerm1SectionViewPane();
         term2SelectionPane = view.getModuleSelectionViewPane().getTerm2SelectionViewPane();
 
+        // Populate combobox with courses
         studentProfileViewPane.populateComboBoxWithCourses(setupAndRetrieveCourses());
 
         // Attach Event Handlers
@@ -67,7 +67,6 @@ public class OptionsModuleChooserController {
     }
 
     // Methods
-
     /**
      * Creates the Bindings needed for the application and
      * attaches the Bindings in the constructor.
@@ -81,15 +80,22 @@ public class OptionsModuleChooserController {
      * attaches the Event Handlers in the constructors.
      */
     private void attachEventHandlers() {
+        // About Menu Item Handler
         optionsModuleChooserMenuBar.addAboutHandler(a -> alertDialogBuilder(AlertType.INFORMATION, "Information Dialog", null, "Options Module Chooser MVC app v1.0"));
+
+        // Exit Menu Item Handler
         optionsModuleChooserMenuBar.addExitHandler(e -> System.exit(0));
 
+        // Creating, Save and Load the Students Profile
         studentProfileViewPane.addCreateStudentProfileHandler(new StudentProfilesHandler());
-        moduleSelectionViewPane.addSubmitModulesHandler(new SubmitModulesHandler());
-        moduleSelectionViewPane.addResetModulesHandler(new ResetModulesHandler());
-
         optionsModuleChooserMenuBar.addLoadStudentDataHandler(new LoadStudentHandler());
         optionsModuleChooserMenuBar.addSaveStudentDataHandler(new SaveStudentHandler());
+
+        // Submit Button Module Selections
+        moduleSelectionViewPane.addSubmitModulesHandler(new SubmitModulesHandler());
+
+        // Reset Button
+        moduleSelectionViewPane.addResetModulesHandler(new ResetModulesHandler());
 
         // Term 1 - Add & Remove Handlers
         term1SelectionPane.addAddHandler(new AddHandler(term1SelectionPane));
@@ -115,6 +121,7 @@ public class OptionsModuleChooserController {
     /**
      * Creates the Change Listeners needed for the application and
      * attaches the Change Listeners in the constructors.
+     * The listeners are used to set max length of characters in the textfield.
      */
     private void attachChangeListeners() {
         studentProfileViewPane.addPNumberChangeListener(new TextFieldLimitListener(10));
@@ -123,7 +130,7 @@ public class OptionsModuleChooserController {
     }
 
     /**
-     * Populates the list views accordingly
+     * Populates the list views accordingly by the course selected
      * Also used to reset when ResetHandler is called.
      */
     private void populateTermModulesViews() {
@@ -166,9 +173,7 @@ public class OptionsModuleChooserController {
         Course course = null;
 
         try(Scanner scan = new Scanner(new File(Paths.get("courses.txt").toUri()))) {
-
             while (scan.hasNextLine()) lines.add(scan.nextLine());
-
             for (String line : lines) {
                 if (line.split(",").length == 1) course = new Course(line);
                 else {
@@ -210,7 +215,6 @@ public class OptionsModuleChooserController {
     }
 
     // Event Handlers
-
     /**
      * Event handler class used to handle when the add button is pressed
      * on each of the term views.
@@ -221,7 +225,6 @@ public class OptionsModuleChooserController {
         TermSelectionViewPane termSelectionViewPane;
 
         // Constructors
-
         /**
          * Passing a reference to the term selection view pane to handle the add button event.
          *
@@ -232,7 +235,6 @@ public class OptionsModuleChooserController {
         }
 
         // Methods
-
         /**
          * Adds the module to the selected list view and updates the credits in the process.
          * Otherwise an alert is shown.
@@ -264,7 +266,6 @@ public class OptionsModuleChooserController {
         TermSelectionViewPane termSelectionViewPane;
 
         // Constructors
-
         /**
          * Passing a reference to the term selection view pane to handle the add button event.
          *
@@ -275,7 +276,6 @@ public class OptionsModuleChooserController {
         }
 
         // Methods
-
         /**
          * Removes the module from the selected list view and updates the credits in the process.
          * If the module is mandatory or nothing is selected upon remove button is pressed then an
@@ -311,7 +311,7 @@ public class OptionsModuleChooserController {
          *
          * @param event when the save student button is pressed.
          * @throws IOException          in the event an error of saving the students profile.
-         * @throws NullPointerException in the event the dialog is cancelled, a message is outputted to the console.
+         * @throws NullPointerException in the event the dialog is cancelled, a message is output to the console.
          */
         @Override
         public void handle(ActionEvent event) {
@@ -401,7 +401,6 @@ public class OptionsModuleChooserController {
                         term2SelectionPane.addToUnselectedList(module, Delivery.TERM_2);
                     }
                 }
-
                 view.changeTab(1);
                 view.enableTab(view.getCourseSelectionTab());
                 optionsModuleChooserMenuBar.enableMenuItem(optionsModuleChooserMenuBar.getSaveItem());
@@ -453,17 +452,19 @@ public class OptionsModuleChooserController {
 
             try(FileWriter fileWriter = new FileWriter(selectedFile)) {
                 PrintWriter printWriter = new PrintWriter(fileWriter);
-
                 printWriter.println("Full Name: " + model.getStudentName().getFirstName() + " " + model.getStudentName().getFamilyName());
                 printWriter.println("PNumber: " + model.getPnumber());
                 printWriter.println("Email: " + model.getEmail());
                 printWriter.println("Submission Date: " + model.getSubmissionDate());
                 printWriter.println("Course: " + model.getCourseOfStudy());
-
                 printWriter.println("\n" + "Selected Modules:");
                 printWriter.println("==========" + "\n");
 
-                List<Module> modules = model.getAllSelectedModules().stream().sorted(Comparator.comparing(Module::getRunPlan)).collect(toList());
+                // Gets all the selected modules on the course and sorts by Delivery and return as a List.
+                List<Module> modules = model.getAllSelectedModules()
+                        .stream()
+                        .sorted(Comparator.comparing(Module::getRunPlan))
+                        .collect(toList());
 
                 for (Module module : modules) {
                     printWriter.println(module.toString());
@@ -506,11 +507,14 @@ public class OptionsModuleChooserController {
                 overviewViewPane.setOverviewResults("Email: " + model.getEmail());
                 overviewViewPane.setOverviewResults("Date: " + model.getSubmissionDate());
                 overviewViewPane.setOverviewResults("Course: " + model.getCourseOfStudy());
-
                 overviewViewPane.setOverviewResults("\n" + "Selected modules:");
                 overviewViewPane.setOverviewResults("==========");
 
-                List<Module> modules = model.getAllSelectedModules().stream().sorted(Comparator.comparing(Module::getRunPlan)).collect(toList());
+                // Gets all the selected modules on the course and sorts by Delivery and return as a List.
+                List<Module> modules = model.getAllSelectedModules()
+                        .stream()
+                        .sorted(Comparator.comparing(Module::getRunPlan))
+                        .collect(toList());
 
                 for (Module module : modules) {
                     overviewViewPane.setOverviewResults("Module Code: " + module.getModuleCode() + ", " + "Module name: " + module.getModuleName());
@@ -600,7 +604,6 @@ public class OptionsModuleChooserController {
         TermSelectionViewPane termSelectionViewPane;
 
         // Constructors
-
         /**
          * Passing a reference to the term selection view pane to handle the add button event.
          *
@@ -611,7 +614,6 @@ public class OptionsModuleChooserController {
         }
 
         // Methods
-
         /**
          * When an item in the unselected list view is doubled clicked its added to the selected modules list view.
          *
@@ -644,7 +646,6 @@ public class OptionsModuleChooserController {
         TermSelectionViewPane termSelectionViewPane;
 
         // Constructors
-
         /**
          * Passing a reference to the term selection view pane to handle the add button event.
          *
@@ -655,7 +656,6 @@ public class OptionsModuleChooserController {
         }
 
         // Methods
-
         /**
          * When an item in the unselected list view is doubled clicked its added to the selected modules list view.
          *
@@ -681,7 +681,6 @@ public class OptionsModuleChooserController {
     }
 
     // Change Listeners
-
     /**
      * Change Listener class used to handle when changes are made on the textfields so that only the max
      * amount of characters are allowed on the textfield.
@@ -698,7 +697,6 @@ public class OptionsModuleChooserController {
         }
 
         // Methods
-
         /**
          * Listens on the amount of characters from the calling property to the specified max value.
          * The property is casted to StringProperty as the implemented ChangeListener takes a String as the generic type.
@@ -719,7 +717,6 @@ public class OptionsModuleChooserController {
     }
 
     // Builders
-
     /**
      * Creates an Alert Builder to create alerts dialogs
      *
