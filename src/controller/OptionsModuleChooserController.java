@@ -463,7 +463,9 @@ public class OptionsModuleChooserController {
                 printWriter.println("\n" + "Selected Modules:");
                 printWriter.println("==========" + "\n");
 
-                for (Module module : model.getAllSelectedModules()) {
+                List<Module> modules = model.getAllSelectedModules().stream().sorted(Comparator.comparing(Module::getRunPlan)).collect(toList());
+
+                for (Module module : modules) {
                     printWriter.println(module.toString());
                     printWriter.println("credits: " + module.getCredits() + ", " + "Mandatory on your course? " + module.isMandatory() + ", " + "Delivery: " + module.getRunPlan() + "\n");
                 }
