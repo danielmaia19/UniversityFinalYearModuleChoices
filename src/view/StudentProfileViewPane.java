@@ -111,6 +111,14 @@ public class StudentProfileViewPane extends GridPane {
     }
 
     /**
+     * Hides the validation message for invalid email.
+     *
+     */
+    public void hideErrorValidationMessage() {
+        emailValidation.setVisible(false);
+    }
+
+    /**
      * Adds a boolean binding to all the text properties including the combobox of courses and
      * the datepicker.
      *
@@ -228,7 +236,7 @@ public class StudentProfileViewPane extends GridPane {
      *
      * @param message is passed as a string to set the validation error message.
      */
-    public void setInvalidEmailMessage(String message) {
+    public void showErrorMessage(String message) {
         emailValidation.setText(message);
     }
 
