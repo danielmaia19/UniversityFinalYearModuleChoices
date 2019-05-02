@@ -64,7 +64,6 @@ public class OptionsModuleChooserController {
 
         // Attach Change Listeners
         this.attachChangeListeners();
-
     }
 
     // Methods
@@ -125,32 +124,32 @@ public class OptionsModuleChooserController {
 
     /**
      * Populates the list views accordingly
-     * Also used to reset when ResetHandler is used.
+     * Also used to reset when ResetHandler is called.
      */
     private void populateTermModulesViews() {
         courseModules = new ArrayList<>(studentProfileViewPane.getSelectedCourse().getAllModulesOnCourse());
-        for (Module m : courseModules) {
-            if (m.getRunPlan() == Delivery.YEAR_LONG) {
-                moduleSelectionViewPane.addYearLongModule(m);
-                model.addToSelectedModules(m);
-                term1SelectionPane.increaseCreditsBy(m.getCredits() / 2);
-                term2SelectionPane.increaseCreditsBy(m.getCredits() / 2);
+        for (Module module : courseModules) {
+            if (module.getRunPlan() == Delivery.YEAR_LONG) {
+                moduleSelectionViewPane.addYearLongModule(module);
+                model.addToSelectedModules(module);
+                term1SelectionPane.increaseCreditsBy(module.getCredits() / 2);
+                term2SelectionPane.increaseCreditsBy(module.getCredits() / 2);
             }
 
-            if (m.getRunPlan() == Delivery.TERM_1 && m.isMandatory()) {
-                model.addToSelectedModules(m);
-                term1SelectionPane.addToSelectedList(m);
-                term1SelectionPane.increaseCreditsBy(m.getCredits());
+            if (module.getRunPlan() == Delivery.TERM_1 && module.isMandatory()) {
+                model.addToSelectedModules(module);
+                term1SelectionPane.addToSelectedList(module);
+                term1SelectionPane.increaseCreditsBy(module.getCredits());
             }
 
-            if (m.getRunPlan() == Delivery.TERM_2 && m.isMandatory()) {
-                model.addToSelectedModules(m);
-                term2SelectionPane.addToSelectedList(m);
-                term2SelectionPane.increaseCreditsBy(m.getCredits());
+            if (module.getRunPlan() == Delivery.TERM_2 && module.isMandatory()) {
+                model.addToSelectedModules(module);
+                term2SelectionPane.addToSelectedList(module);
+                term2SelectionPane.increaseCreditsBy(module.getCredits());
             }
 
-            term1SelectionPane.addToUnselectedList(m, Delivery.TERM_1);
-            term2SelectionPane.addToUnselectedList(m, Delivery.TERM_2);
+            term1SelectionPane.addToUnselectedList(module, Delivery.TERM_1);
+            term2SelectionPane.addToUnselectedList(module, Delivery.TERM_2);
         }
     }
 
@@ -161,7 +160,6 @@ public class OptionsModuleChooserController {
      * @return a set of courses and their modules.
      */
     private Set<Course> setupAndRetrieveCourses() {
-
         // Used Sets to prevent duplicate courses and TreeSet for ordering.
         Set<Course> courses = new TreeSet<>();
         List<String> lines = new ArrayList<>();
@@ -245,7 +243,7 @@ public class OptionsModuleChooserController {
         public void handle(ActionEvent event) {
             try {
                 if (model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
-                    alertDialogBuilder(AlertType.ERROR, "Duplicate Module", null, "Module has already been added");
+                    alertDialogBuilder(AlertType.ERROR, "Error", null, "Module has already been added");
                 } else {
                     addModulesToListAndUpdateCredits(termSelectionViewPane);
                 }
@@ -318,13 +316,9 @@ public class OptionsModuleChooserController {
         @Override
         public void handle(ActionEvent event) {
             File selectedFile = saveDialogBuilder("Save Profile", "DAT files (*.dat)", "dat");
-
-            ObjectOutputStream oos;
-            try {
-                oos = new ObjectOutputStream(new FileOutputStream(selectedFile));
+            try(ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(selectedFile))) {
                 oos.writeObject(model);
                 oos.flush();
-                oos.close();
                 alertDialogBuilder(AlertType.INFORMATION, "Profile Data Successfully Saved", null, "Your profile has been saved successfully");
             } catch (IOException error) {
                 error.printStackTrace();
@@ -380,31 +374,31 @@ public class OptionsModuleChooserController {
                 courseModules = new ArrayList<>(studentProfileViewPane.getSelectedCourse().getAllModulesOnCourse());
                 List<Module> savedStudentProfile = new ArrayList<>(loadedStudentProfile.getAllSelectedModules());
 
-                for (Module m : savedStudentProfile) {
-                    if (m.getRunPlan() == Delivery.YEAR_LONG) {
-                        model.addToSelectedModules(m);
-                        moduleSelectionViewPane.addYearLongModule(m);
-                        term1SelectionPane.increaseCreditsBy(m.getCredits() / 2);
-                        term2SelectionPane.increaseCreditsBy(m.getCredits() / 2);
+                for (Module module : savedStudentProfile) {
+                    if (module.getRunPlan() == Delivery.YEAR_LONG) {
+                        model.addToSelectedModules(module);
+                        moduleSelectionViewPane.addYearLongModule(module);
+                        term1SelectionPane.increaseCreditsBy(module.getCredits() / 2);
+                        term2SelectionPane.increaseCreditsBy(module.getCredits() / 2);
                     }
 
-                    if (m.getRunPlan() == Delivery.TERM_1) {
-                        model.addToSelectedModules(m);
-                        term1SelectionPane.addToSelectedList(m);
-                        term1SelectionPane.increaseCreditsBy(m.getCredits());
+                    if (module.getRunPlan() == Delivery.TERM_1) {
+                        model.addToSelectedModules(module);
+                        term1SelectionPane.addToSelectedList(module);
+                        term1SelectionPane.increaseCreditsBy(module.getCredits());
                     }
 
-                    if (m.getRunPlan() == Delivery.TERM_2) {
-                        model.addToSelectedModules(m);
-                        term2SelectionPane.addToSelectedList(m);
-                        term2SelectionPane.increaseCreditsBy(m.getCredits());
+                    if (module.getRunPlan() == Delivery.TERM_2) {
+                        model.addToSelectedModules(module);
+                        term2SelectionPane.addToSelectedList(module);
+                        term2SelectionPane.increaseCreditsBy(module.getCredits());
                     }
                 }
 
-                for (Module m : courseModules) {
-                    if (!savedStudentProfile.contains(m)) {
-                        term1SelectionPane.addToUnselectedList(m, Delivery.TERM_1);
-                        term2SelectionPane.addToUnselectedList(m, Delivery.TERM_2);
+                for (Module module : courseModules) {
+                    if (!savedStudentProfile.contains(module)) {
+                        term1SelectionPane.addToUnselectedList(module, Delivery.TERM_1);
+                        term2SelectionPane.addToUnselectedList(module, Delivery.TERM_2);
                     }
                 }
 
@@ -449,7 +443,7 @@ public class OptionsModuleChooserController {
          * Saves the students overview which includes their information and their selected course and modules.
          * If nothing is selected and the window is cancelled then a message is show in the console.
          *
-         * @param event when the sve overview button is pressed.
+         * @param event when the save overview button is pressed.
          * @throws IOException          when there is an issue with saving the overview to a text file.
          * @throws NullPointerException when the dialog is cancelled a message will appear in the console.
          */
@@ -458,7 +452,6 @@ public class OptionsModuleChooserController {
             File selectedFile = saveDialogBuilder("Save Overview", "TXT files (*.txt)", "txt");
 
             try(FileWriter fileWriter = new FileWriter(selectedFile)) {
-                ;
                 PrintWriter printWriter = new PrintWriter(fileWriter);
 
                 printWriter.println("Full Name: " + model.getStudentName().getFirstName() + " " + model.getStudentName().getFamilyName());
@@ -470,9 +463,9 @@ public class OptionsModuleChooserController {
                 printWriter.println("\n" + "Selected Modules:");
                 printWriter.println("==========" + "\n");
 
-                for (Module m : model.getAllSelectedModules()) {
-                    printWriter.println(m.toString());
-                    printWriter.println("credits: " + m.getCredits() + ", " + "Mandatory on your course? " + m.isMandatory() + ", " + "Delivery: " + m.getRunPlan() + "\n");
+                for (Module module : model.getAllSelectedModules()) {
+                    printWriter.println(module.toString());
+                    printWriter.println("credits: " + module.getCredits() + ", " + "Mandatory on your course? " + module.isMandatory() + ", " + "Delivery: " + module.getRunPlan() + "\n");
                 }
 
                 alertDialogBuilder(AlertType.INFORMATION, "Module Selections Saved", null, "Your course and modules selections has been saved");
@@ -499,8 +492,6 @@ public class OptionsModuleChooserController {
          */
         @Override
         public void handle(ActionEvent event) {
-
-            //model.clearAllSelectedModules();
             overviewViewPane.clearResults();
 
             if (term1SelectionPane.getCredits() < term1SelectionPane.getCreditLimit()) {
@@ -520,13 +511,12 @@ public class OptionsModuleChooserController {
                 List<Module> modules = model.getAllSelectedModules().stream().sorted(Comparator.comparing(Module::getRunPlan)).collect(toList());
 
                 for (Module module : modules) {
-                    overviewViewPane.setOverviewResults("Module Code: " + module.getModuleCode() + "," + "Module name: " + module.getModuleName());
+                    overviewViewPane.setOverviewResults("Module Code: " + module.getModuleCode() + ", " + "Module name: " + module.getModuleName());
                     overviewViewPane.setOverviewResults("credits: " + module.getCredits() + ", "
                             + "Mandatory on your course? " + module.convertMandatoryToString(module.isMandatory()) + ", "
                             + "Delivery: " + module.getRunPlan().toString() + "\n"
                     );
                 }
-
                 view.changeTab(2);
                 view.enableTab(view.getOverviewTab());
             }
@@ -541,7 +531,7 @@ public class OptionsModuleChooserController {
 
         /**
          * Creates the students profile with all the information entered and sets the model for later reference.
-         * Provided teh email they entered is valid.
+         * Provided email they entered is valid.
          * The list views are populated with the relevant modules from the selected course.
          *
          * @param event when the create student profile button is pressed.
@@ -554,18 +544,20 @@ public class OptionsModuleChooserController {
 
             // Email validation - check if the email is valid
             if (studentProfileViewPane.isEmailValid()) {
-                // Sets the information provided to the model.
+                // Sets the information to the model.
                 model.setCourseOfStudy(studentProfileViewPane.getSelectedCourse());
                 model.setEmail(studentProfileViewPane.getTxtEmail());
                 model.setPnumber(studentProfileViewPane.getTxtPNumber());
                 model.setStudentName(new Name(studentProfileViewPane.getTxtFirstName(), studentProfileViewPane.getTxtSurname()));
                 model.setSubmissionDate(studentProfileViewPane.getDate());
+
                 populateTermModulesViews();
                 view.changeTab(1);
+                studentProfileViewPane.hideErrorMessage();
                 view.enableTab(view.getCourseSelectionTab());
                 optionsModuleChooserMenuBar.enableMenuItem(optionsModuleChooserMenuBar.getSaveItem());
             } else {
-                studentProfileViewPane.setInvalidEmailMessage("Enter a valid email address");
+                studentProfileViewPane.showErrorMessage("Enter a valid email address");
             }
         }
     }
@@ -591,11 +583,7 @@ public class OptionsModuleChooserController {
             try {
                 studentProfileViewPane.populateComboBoxWithCourses(setupAndRetrieveCourses());
             } catch (IllegalArgumentException error) {
-                alertDialogBuilder(
-                        AlertType.ERROR,
-                        "Error Loading File",
-                        null,
-                        error.getMessage() + ". The value inserted is incorrect.");
+                alertDialogBuilder(AlertType.ERROR, "Error Loading File", null, error.getMessage() + ". The value inserted is incorrect.");
             }
         }
     }
@@ -632,7 +620,7 @@ public class OptionsModuleChooserController {
             try {
                 if (event.getClickCount() == 2) {
                     if (model.getAllSelectedModules().contains(termSelectionViewPane.getUnSelectedModule())) {
-                        alertDialogBuilder(AlertType.ERROR, "Duplicate Module", null, "Module already added");
+                        alertDialogBuilder(AlertType.ERROR, "Error", null, "Module already added");
                     } else {
                         addModulesToListAndUpdateCredits(termSelectionViewPane);
                     }
